@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthGuide — Safe Self-Care Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:            #F6F3EE;
+  --surface:       #FFFFFF;
+  --surface2:      #EFECE5;
+  --surface3:      #E8E4DB;
+  --border:        #DDD8CE;
+  --border-strong: #BEB9AE;
+  --text:          #1C1917;
+  --text-muted:    #6B655E;
+  --text-faint:    #A09890;
+  --accent:        #1F5C35;
+  --accent-light:  #E8F2EB;
+  --accent-mid:    #3A8A52;
+  --accent-hover:  #174A2A;
+  --danger:        #8B1A1A;
+  --danger-light:  #FEF1F1;
+  --danger-border: #EDBBBB;
+  --warning:       #7A4A18;
+  --warning-light: #FDF5EC;
+  --warning-border:#EAC98A;
+  --info-light:    #EDF5FE;
+  --info-border:   #AACFF0;
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     16px;
+  --shadow-sm:     0 1px 2px rgba(0,0,0,.05);
+  --shadow:        0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --font-serif:    'DM Serif Display', Georgia, serif;
+  --font-sans:     'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.logo-mark {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-mark svg { color: white; }
+.header-text h1 { font-family: var(--font-serif); font-size: 19px; font-weight: 400; }
+.header-text p  { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.no-rx-badge {
+  margin-left: auto; font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border);
+}
+
+/* ── Body split ── */
+.app-body {
+  display: grid;
+  grid-template-columns: 356px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sidebar-inner { padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; }
+
+.sec-label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px;
+}
+
+/* Chip grid */
+.chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  font-family: var(--font-sans); font-size: 12.5px;
+  padding: 4px 11px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); cursor: pointer;
+  transition: border-color .12s, background .12s, color .12s;
+  user-select: none;
+}
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent-mid); font-weight: 500; }
+.chip.is-danger { border-color: var(--danger-border); color: var(--danger); }
+.chip.is-danger.active { background: var(--danger-light); }
+
+/* Fields */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: var(--text-muted); }
+.field label .opt { color: var(--text-faint); font-size: 11px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+input[type=text], input[type=number], select, textarea {
+  font-family: var(--font-sans); font-size: 13px;
+  padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface);
+  color: var(--text); width: 100%;
+  transition: border-color .12s, box-shadow .12s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent-mid);
+  box-shadow: 0 0 0 3px rgba(31,92,53,.1);
+}
+textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+select { cursor: pointer; }
+
+/* Divider */
+hr.div { border: none; border-top: 1px solid var(--border); }
+
+/* Buttons */
+.btn-analyze {
+  width: 100%; padding: 11px; border: none; cursor: pointer;
+  background: var(--accent); color: white;
+  font-family: var(--font-serif); font-size: 15px; letter-spacing: .02em;
+  border-radius: var(--radius); transition: background .13s, transform .1s;
+}
+.btn-analyze:hover  { background: var(--accent-hover); }
+.btn-analyze:active { transform: scale(.98); }
+.btn-analyze:disabled { background: var(--border-strong); cursor: not-allowed; }
+
+.btn-clear {
+  width: 100%; padding: 7px; background: none;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); cursor: pointer;
+  transition: all .13s;
+}
+.btn-clear:hover { background: var(--surface2); color: var(--text); }
+
+/* ── Chat pane ── */
+.chat-pane { display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+
+/* Progress bar */
+.progress-bar { height: 3px; background: var(--border); flex-shrink: 0; }
+.progress-fill { height: 100%; background: var(--accent-mid); border-radius: 0 2px 2px 0; transition: width .35s ease; }
+
+/* Messages */
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 18px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.chat-messages::-webkit-scrollbar { width: 5px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Empty state */
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  color: var(--text-faint); text-align: center; padding: 32px;
+}
+.empty-state svg { opacity: .3; }
+.empty-state h3 { font-family: var(--font-serif); font-size: 18px; font-weight: 400; color: var(--text-muted); }
+.empty-state p  { font-size: 13px; max-width: 300px; line-height: 1.7; }
+
+/* Message row */
+.msg-row { display: flex; gap: 10px; align-items: flex-start; }
+.msg-row.from-user { flex-direction: row-reverse; }
+
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; margin-top: 2px;
+}
+.avatar.bot  { background: var(--accent-light); color: var(--accent); border: 1px solid #BDD9C5; }
+.avatar.user { background: var(--surface3); color: var(--text-muted); border: 1px solid var(--border); }
+
+.msg-col { display: flex; flex-direction: column; max-width: 78%; gap: 3px; }
+.from-user .msg-col { align-items: flex-end; }
+
+.bubble {
+  padding: 11px 14px; border-radius: var(--radius-lg);
+  font-size: 13.5px; line-height: 1.75;
+  box-shadow: var(--shadow-sm); animation: fadeUp .2s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+.bubble.bot  { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; }
+.bubble.user { background: var(--accent); color: white; border-top-right-radius: 4px; }
+.bubble.alert-urgent { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); border-radius: var(--radius); font-size: 13px; }
+.bubble.alert-info   { background: var(--info-light); color: #1A4A7A; border: 1px solid var(--info-border); border-radius: var(--radius); font-size: 13px; }
+
+.bubble p            { margin-bottom: 6px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { padding-left: 18px; margin: 6px 0; }
+.bubble li           { margin-bottom: 4px; }
+.bubble strong       { font-weight: 600; }
+.bubble h4           { font-family: var(--font-serif); font-size: 14px; font-weight: 400; margin: 10px 0 4px; }
+.bubble .footer-note { font-size: 11.5px; color: var(--text-faint); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.bubble.user .footer-note { color: rgba(255,255,255,.65); border-top-color: rgba(255,255,255,.2); }
+.bubble hr           { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+.msg-time { font-size: 11px; color: var(--text-faint); padding: 0 2px; }
+
+/* Typing */
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
+  animation: dot-bounce 1.3s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .2s; }
+.typing-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes dot-bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-6px); } }
+
+/* Input bar */
+.chat-input-bar {
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  background: var(--surface); display: flex; gap: 10px; align-items: flex-end;
+  flex-shrink: 0;
+}
+.chat-input-bar textarea {
+  flex: 1; min-height: 40px; max-height: 120px;
+  padding: 9px 13px; resize: none; border-radius: 20px;
+  font-size: 13.5px; line-height: 1.5; overflow: auto;
+}
+.btn-send {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background .13s, transform .1s;
+}
+.btn-send:hover  { background: var(--accent-hover); }
+.btn-send:active { transform: scale(.9); }
+.btn-send:disabled { background: var(--border-strong); cursor: not-allowed; }
+.btn-send svg { color: white; }
+.btn-clear-chat {
+  background: none; border: none; color: var(--text-faint); font-size: 12px;
+  cursor: pointer; padding: 4px 6px; border-radius: 6px; align-self: center;
+  transition: all .13s; white-space: nowrap;
+}
+.btn-clear-chat:hover { background: var(--surface2); color: var(--text-muted); }
+
+/* Urgency banner */
+.urgency-banner {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; border-radius: var(--radius); font-size: 12.5px;
+  animation: fadeUp .2s ease;
+}
+.urgency-banner.urgent  { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); }
+.urgency-banner.caution { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
+.urgency-banner svg { flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="app-header">
+  <div class="logo-mark">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>HealthGuide</h1>
+    <p>Safe self-care advice · No medicines recommended · Not a substitute for professional care</p>
+  </div>
+  <span class="no-rx-badge">⚕ No prescriptions</span>
+</header>
+
+<!-- Body -->
+<div class="app-body">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <!-- Symptoms -->
+      <div>
+        <div class="sec-label">Symptoms <span style="font-size:10px;text-transform:none;color:var(--text-faint)">(tap to select)</span></div>
+        <div class="chip-grid" id="symptom-chips">
+          <span class="chip" data-val="Fever">Fever</span>
+          <span class="chip" data-val="Cough">Cough</span>
+          <span class="chip" data-val="Headache">Headache</span>
+          <span class="chip" data-val="Fatigue">Fatigue</span>
+          <span class="chip" data-val="Sore throat">Sore throat</span>
+          <span class="chip" data-val="Runny nose">Runny nose</span>
+          <span class="chip" data-val="Body aches">Body aches</span>
+          <span class="chip" data-val="Nausea">Nausea</span>
+          <span class="chip" data-val="Vomiting">Vomiting</span>
+          <span class="chip" data-val="Diarrhea">Diarrhea</span>
+          <span class="chip is-danger" data-val="Chest pain">Chest pain</span>
+          <span class="chip is-danger" data-val="Dizziness">Dizziness</span>
+        </div>
+      </div>
+
+      <!-- Free text -->
+      <div class="field">
+        <label>Describe in your own words <span class="opt">(injuries, bites, unusual…)</span></label>
+        <textarea id="details" placeholder="e.g. snake bite on left ankle, sharp pain in side, swallowed something…" rows="3"></textarea>
+      </div>
+
+      <hr class="div">
+
+      <!-- Conditions -->
+      <div>
+        <div class="sec-label">Existing conditions</div>
+        <div class="chip-grid" id="cond-chips">
+          <span class="chip active" data-val="None">None</span>
+          <span class="chip" data-val="Diabetes">Diabetes</span>
+          <span class="chip" data-val="Hypertension">Hypertension</span>
+          <span class="chip" data-val="Asthma">Asthma</span>
+          <span class="chip" data-val="Heart disease">Heart disease</span>
+          <span class="chip" data-val="Pregnancy">Pregnancy</span>
+          <span class="chip" data-val="Kidney disease">Kidney disease</span>
+          <span class="chip" data-val="Immune system condition">Immune condition</span>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- Details row -->
+      <div class="row2">
+        <div class="field">
+          <label>Age <span class="opt">(optional)</span></label>
+          <input type="number" id="age" placeholder="e.g. 34" min="0" max="120">
+        </div>
+        <div class="field">
+          <label>Breathing difficulty</label>
+          <select id="breathing">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Duration</label>
+          <select id="duration">
+            <option>Less than 1 day</option>
+            <option selected>1 to 3 days</option>
+            <option>4 to 7 days</option>
+            <option>More than 1 week</option>
+            <option>More than 2 weeks</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Severity</label>
+          <select id="severity">
+            <option>Mild</option>
+            <option>Moderate</option>
+            <option>Severe</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <button class="btn-analyze" id="btn-analyze" onclick="analyze()">Analyze my symptoms</button>
+      <button class="btn-clear"   onclick="clearAll()">Clear everything</button>
+
+    </div>
+  </aside>
+
+  <!-- ── Chat pane ── -->
+  <section class="chat-pane">
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="empty-state" id="empty-state">
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+          <path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        <h3>How can I help you today?</h3>
+        <p>Select your symptoms on the left, then click <strong>Analyze my symptoms</strong> or type a question below.</p>
+      </div>
+    </div>
+
+    <div class="chat-input-bar">
+      <textarea id="chat-input"
+        placeholder="Ask a follow-up question…"
+        rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+        oninput="autoGrow(this)"></textarea>
+      <button class="btn-send" id="btn-send" onclick="sendMessage()" title="Send">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+          <path d="m22 2-11 11M22 2 15 22l-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+      <button class="btn-clear-chat" onclick="clearChat()">Clear chat</button>
+    </div>
+  </section>
+</div>
+
+<script>
+// ── Chip logic ──────────────────────────────────────────────────────────────
+document.querySelectorAll('#symptom-chips .chip').forEach(c =>
+  c.addEventListener('click', () => { c.classList.toggle('active'); updateProgress(); })
+);
+
+document.querySelectorAll('#cond-chips .chip').forEach(c =>
+  c.addEventListener('click', () => {
+    if (c.dataset.val === 'None') {
+      document.querySelectorAll('#cond-chips .chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    } else {
+      document.querySelector('#cond-chips [data-val="None"]').classList.remove('active');
+      c.classList.toggle('active');
+      if (!document.querySelectorAll('#cond-chips .chip.active').length)
+        document.querySelector('#cond-chips [data-val="None"]').classList.add('active');
+    }
+    updateProgress();
+  })
+);
+
+// ── Progress ────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const syms = document.querySelectorAll('#symptom-chips .chip.active').length;
+  const detail = document.getElementById('details').value.trim().length;
+  const age = document.getElementById('age').value;
+  let p = 5;
+  if (syms > 0 || detail > 3) p = 40;
+  if (p >= 40 && age) p = 70;
+  if (p >= 40) p = Math.min(p + 10, 85);
+  document.getElementById('progress').style.width = p + '%';
+}
+document.getElementById('details').addEventListener('input', updateProgress);
+document.getElementById('age').addEventListener('input', updateProgress);
+
+// ── Collect form data ───────────────────────────────────────────────────────
+function collectHealthInfo() {
+  const symptoms   = [...document.querySelectorAll('#symptom-chips .chip.active')].map(c => c.dataset.val);
+  const conditions = [...document.querySelectorAll('#cond-chips .chip.active')].map(c => c.dataset.val);
+  const ageVal     = document.getElementById('age').value.trim();
+  return {
+    symptoms,
+    conditions: conditions.length ? conditions : ['None'],
+    age: ageVal && /^\d+$/.test(ageVal) ? parseInt(ageVal) : null,
+    duration: document.getElementById('duration').value,
+    severity: document.getElementById('severity').value,
+    breathing_difficulty: document.getElementById('breathing').value === 'Yes',
+    details: document.getElementById('details').value.trim(),
+  };
+}
+
+// ── Render helpers ──────────────────────────────────────────────────────────
+function ts() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function removeEmpty() {
+  document.getElementById('empty-state')?.remove();
+}
+
+function setLoading(on) {
+  document.getElementById('btn-analyze').disabled = on;
+  document.getElementById('btn-send').disabled    = on;
+}
+
+function appendUserMsg(text) {
+  removeEmpty();
+  const msgs = document.getElementById('chat-messages');
+  msgs.insertAdjacentHTML('beforeend', `
+    <div class="msg-row from-user">
+      <div class="avatar user">You</div>
+      <div class="msg-col">
+        <div class="bubble user">${escHtml(text)}</div>
+        <div class="msg-time">${ts()}</div>
+      </div>
+    </div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  removeEmpty();
+  const msgs = document.getElementById('chat-messages');
+  msgs.insertAdjacentHTML('beforeend', `
+    <div class="msg-row" id="typing-row">
+      <div class="avatar bot">HG</div>
+      <div class="bubble bot typing-dots"><span></span><span></span><span></span></div>
+    </div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typing-row')?.remove();
+}
+
+function appendBotMsg(text) {
+  const msgs = document.getElementById('chat-messages');
+  const isUrgent = /emergency|immediately|call\s*(112|911|999|ambulance)|hospital\s*urgently/i.test(text);
+  const html = renderMarkdown(text);
+  msgs.insertAdjacentHTML('beforeend', `
+    <div class="msg-row">
+      <div class="avatar bot">HG</div>
+      <div class="msg-col">
+        <div class="bubble bot ${isUrgent ? 'alert-urgent' : ''}">${html}</div>
+        <div class="msg-time">${ts()}</div>
+      </div>
+    </div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('progress').style.width = '100%';
+  setTimeout(() => document.getElementById('progress').style.width = '0%', 1500);
+}
+
+// ── Markdown-lite renderer ──────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderMarkdown(raw) {
+  let s = escHtml(raw);
+  // Bold
+  s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Horizontal rule (--- or ***)
+  s = s.replace(/^(---|===|\*\*\*)$/gm, '<hr>');
+  // Headers ## or ###
+  s = s.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+  s = s.replace(/^##\s+(.+)$/gm,  '<h4>$1</h4>');
+  // Emoji callouts (lines starting with 🚨 ⚕ ⚠)
+  s = s.replace(/^(🚨[^\n]+)$/gm, '<p class="footer-note">$1</p>');
+  s = s.replace(/^(⚕[^\n]+)$/gm,  '<p class="footer-note">$1</p>');
+  // Bullet list
+  const lines = s.split('\n');
+  const out = []; let inList = false;
+  for (const line of lines) {
+    if (/^[-*•]\s/.test(line)) {
+      if (!inList) { out.push('<ul>'); inList = true; }
+      out.push('<li>' + line.replace(/^[-*•]\s/, '') + '</li>');
+    } else if (/^\d+\.\s/.test(line)) {
+      if (!inList) { out.push('<ol>'); inList = true; }
+      out.push('<li>' + line.replace(/^\d+\.\s/, '') + '</li>');
+    } else {
+      if (inList) { out.push(inList === 'ol' ? '</ol>' : '</ul>'); inList = false; }
+      out.push(line.trim() ? '<p>' + line + '</p>' : '');
+    }
+  }
+  if (inList) out.push('</ul>');
+  return out.join('');
+}
+
+// ── API call ────────────────────────────────────────────────────────────────
+async function callBackend(message, healthInfo) {
+  const res = await fetch('/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, health_info: healthInfo }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data.reply;
+}
+
+// ── Analyze ─────────────────────────────────────────────────────────────────
+async function analyze() {
+  const info = collectHealthInfo();
+  if (!info.symptoms.length && !info.details) {
+    shakeBtn(); return;
+  }
+  const summary = buildSummary(info);
+  appendUserMsg('Please analyze my symptoms and suggest safe self-care steps.\n\n' + summary);
+  await doAsk('Please analyze my symptoms and suggest safe self-care steps.', info);
+}
+
+function buildSummary(info) {
+  const parts = [];
+  if (info.symptoms.length) parts.push(`Symptoms: ${info.symptoms.join(', ')}`);
+  if (info.details)         parts.push(`Details: ${info.details}`);
+  if (!info.conditions.includes('None')) parts.push(`Conditions: ${info.conditions.join(', ')}`);
+  if (info.age)             parts.push(`Age: ${info.age}`);
+  parts.push(`Duration: ${info.duration}`, `Severity: ${info.severity}`);
+  if (info.breathing_difficulty) parts.push('Breathing difficulty: Yes');
+  return parts.join(' · ');
+}
+
+// ── Send follow-up ───────────────────────────────────────────────────────────
+async function sendMessage() {
+  const inp  = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  appendUserMsg(text);
+  await doAsk(text, collectHealthInfo());
+}
+
+// ── Core ask ─────────────────────────────────────────────────────────────────
+async function doAsk(message, healthInfo) {
+  setLoading(true); showTyping();
+  try {
+    const reply = await callBackend(message, healthInfo);
+    removeTyping(); appendBotMsg(reply);
+  } catch (err) {
+    removeTyping();
+    appendBotMsg(`⚠️ Could not reach the server.\n\n**Error:** ${err.message}\n\nMake sure the Flask server is running (\`python app.py\`) and your \`.env\` file is configured.`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── Clear ────────────────────────────────────────────────────────────────────
+function clearAll() {
+  document.querySelectorAll('#symptom-chips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#cond-chips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#cond-chips [data-val="None"]').classList.add('active');
+  document.getElementById('age').value      = '';
+  document.getElementById('breathing').value = 'No';
+  document.getElementById('duration').value  = '1 to 3 days';
+  document.getElementById('severity').value  = 'Mild';
+  document.getElementById('details').value   = '';
+  fetch('/clear', { method: 'POST' });
+  clearChat();
+}
+
+async function clearChat() {
+  try { await fetch('/clear', { method: 'POST' }); } catch {}
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="empty-state" id="empty-state">
+      <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+        <path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+      <h3>How can I help you today?</h3>
+      <p>Select your symptoms on the left, then click <strong>Analyze my symptoms</strong> or type a question below.</p>
+    </div>`;
+  document.getElementById('progress').style.width = '0%';
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function shakeBtn() {
+  const b = document.getElementById('btn-analyze');
+  b.style.animation = 'none'; void b.offsetWidth;
+  b.style.animation = 'shake .4s ease';
+}
+
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }`;
+document.head.appendChild(shakeStyle);
+</script>
+</body>
+</html>

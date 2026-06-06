@@ -16,6 +16,7 @@ from typing import Any
 # Gemini 2.5 Flash has a 1M token context window — this is fine.
 
 HEALTH_KNOWLEDGE = """
+incase there is some deficiency in human's body like example:if they have joints problem , they need calcium , vitamin d . so also focus on nutrients and vitamins and source of food from where they can fulfill the deficiency.
 === GENERAL SELF-CARE ===
 Provide educational guidance only. Never diagnose, prescribe, name medicines, suggest dosages,
 or replace a healthcare professional. Safe non-medication advice includes: rest, hydration
@@ -284,6 +285,7 @@ STRICT RULES — follow these without exception:
 7. End EVERY response with a short "⚠️ Watch for these warning signs:" section listing
    specific signs that mean the person should seek medical care immediately.
 8. Keep responses clear, structured, and easy to follow under stress.
+9.answers should be on point nothing extra 
 
 You have the following health guidance knowledge available:
 
@@ -375,12 +377,40 @@ class DynamicHealthChatbot:
         self._prepare_gcp_credentials()
 
         import vertexai
-        from vertexai.generative_models import GenerativeModel, GenerationConfig
+        from vertexai.generative_models import (
+            GenerativeModel,
+            GenerationConfig,
+            HarmCategory,
+            HarmBlockThreshold,
+            SafetySetting,
+        )
 
         vertexai.init(
             project=self.config.project or None,
             location=self.config.location,
         )
+
+        # Turn off Vertex AI's built-in safety filters for all harm categories.
+        # This is a legitimate medical self-care app — the filters block useful
+        # health guidance (snake bite first aid, wound care, etc.) by mistake.
+        safety_settings = [
+            SafetySetting(
+                category=HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=HarmBlockThreshold.OFF,
+            ),
+            SafetySetting(
+                category=HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=HarmBlockThreshold.OFF,
+            ),
+            SafetySetting(
+                category=HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=HarmBlockThreshold.OFF,
+            ),
+            SafetySetting(
+                category=HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold=HarmBlockThreshold.OFF,
+            ),
+        ]
 
         model = GenerativeModel(
             model_name=self.config.model,
@@ -389,11 +419,9 @@ class DynamicHealthChatbot:
                 temperature=0.2,
                 max_output_tokens=1024,
             ),
+            safety_settings=safety_settings,
         )
 
-        # Return a chat session starter — we manage history ourselves
-        # so we use the model's start_chat with empty history each time
-        # and pass our accumulated history on each call.
         return _StatelessChat(model)
 
     def _prepare_gcp_credentials(self) -> None:
@@ -484,5 +512,5 @@ class _StatelessChat:
         ]
         current_text = current["parts"][0]["text"]
 
-        chat = self._model.start_chat(history=contents)
+        chat = self._model.start_chat(history=contents, response_validation=False)
         return chat.send_message(current_text)

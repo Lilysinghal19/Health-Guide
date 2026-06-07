@@ -202,26 +202,83 @@ hr.div { border: none; border-top: 1px solid var(--border); }
 .from-user .msg-col { align-items: flex-end; }
 
 .bubble {
-  padding: 11px 14px; border-radius: var(--radius-lg);
+  padding: 14px 16px; border-radius: var(--radius-lg);
   font-size: 13.5px; line-height: 1.75;
   box-shadow: var(--shadow-sm); animation: fadeUp .2s ease;
 }
-@keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
 .bubble.bot  { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; }
 .bubble.user { background: var(--accent); color: white; border-top-right-radius: 4px; }
-.bubble.alert-urgent { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); border-radius: var(--radius); font-size: 13px; }
-.bubble.alert-info   { background: var(--info-light); color: #1A4A7A; border: 1px solid var(--info-border); border-radius: var(--radius); font-size: 13px; }
+.bubble.alert-urgent { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); border-radius: var(--radius); }
+.bubble.alert-info   { background: var(--info-light); color: #1A4A7A; border: 1px solid var(--info-border); border-radius: var(--radius); }
 
-.bubble p            { margin-bottom: 6px; }
-.bubble p:last-child { margin-bottom: 0; }
-.bubble ul, .bubble ol { padding-left: 18px; margin: 6px 0; }
-.bubble li           { margin-bottom: 4px; }
-.bubble strong       { font-weight: 600; }
-.bubble h4           { font-family: var(--font-serif); font-size: 14px; font-weight: 400; margin: 10px 0 4px; }
-.bubble .footer-note { font-size: 11.5px; color: var(--text-faint); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
-.bubble.user .footer-note { color: rgba(255,255,255,.65); border-top-color: rgba(255,255,255,.2); }
-.bubble hr           { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+/* ── Structured response sections ── */
+.bubble .section {
+  margin-bottom: 14px;
+}
+.bubble .section:last-child { margin-bottom: 0; }
+
+/* ## section heading */
+.bubble .sec-heading {
+  display: flex; align-items: center; gap-7px;
+  font-family: var(--font-serif); font-size: 15px; font-weight: 400;
+  color: var(--accent); margin-bottom: 8px; padding-bottom: 5px;
+  border-bottom: 1.5px solid var(--accent-light);
+}
+.bubble .sec-heading.warning { color: var(--warning); border-bottom-color: var(--warning-border); }
+.bubble .sec-heading.danger  { color: var(--danger);  border-bottom-color: var(--danger-border); }
+.bubble .sec-heading.purple  { color: #5B3FA6; border-bottom-color: #E0D4F7; }
+
+/* **bold** sub-heading inside a section */
+.bubble .sub-group { margin-bottom: 10px; }
+.bubble .sub-label {
+  display: inline-block; font-size: 12px; font-weight: 600;
+  color: var(--text-muted); background: var(--surface2);
+  padding: 2px 9px; border-radius: 20px; margin-bottom: 5px;
+  border: 1px solid var(--border);
+}
+
+/* Lists */
+.bubble ul { list-style: none; padding: 0; margin: 0; }
+.bubble ol { padding-left: 20px; margin: 0; }
+.bubble ul li {
+  padding: 3px 0 3px 18px; position: relative;
+  color: var(--text); font-size: 13px; line-height: 1.65;
+  border-bottom: 1px solid var(--surface2);
+}
+.bubble ul li:last-child { border-bottom: none; }
+.bubble ul li::before {
+  content: ''; position: absolute; left: 4px; top: 11px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-mid);
+}
+.bubble ol li {
+  color: var(--text); font-size: 13px; line-height: 1.65; margin-bottom: 4px;
+  padding-left: 3px;
+}
+
+/* Emergency ordered list gets red numbering */
+.bubble .section.is-emergency ol { counter-reset: emerg; list-style: none; padding: 0; }
+.bubble .section.is-emergency ol li {
+  counter-increment: emerg; padding-left: 28px; position: relative; margin-bottom: 6px;
+  background: rgba(139,26,26,.04); border-radius: 6px; padding-top: 4px; padding-bottom: 4px;
+}
+.bubble .section.is-emergency ol li::before {
+  content: counter(emerg); position: absolute; left: 6px; top: 4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--danger); color: white;
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  line-height: 16px; text-align: center;
+}
+
+/* Footer / disclaimer */
+.bubble .resp-footer {
+  font-size: 11.5px; color: var(--text-faint);
+  margin-top: 12px; padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+.bubble hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
 .msg-time { font-size: 11px; color: var(--text-faint); padding: 0 2px; }
 
@@ -510,12 +567,23 @@ function removeTyping() {
 
 function appendBotMsg(text) {
   const msgs = document.getElementById('chat-messages');
-  const isUrgent = /emergency|immediately|call\s*(112|911|999|ambulance)|hospital\s*urgently/i.test(text);
-  const html = renderMarkdown(text);
+  const isUrgent = /🚨|emergency|immediately|call\s*(112|911|999|ambulance)/i.test(text);
+
+  // Separate the safety footer lines (⚕ / 🚨 lines after ---)
+  let mainText = text;
+  let footerHtml = '';
+  const footerMatch = text.match(/\n---\n([\s\S]+)$/);
+  if (footerMatch) {
+    mainText = text.slice(0, text.indexOf('\n---\n'));
+    footerHtml = `<div class="resp-footer">${escHtml(footerMatch[1].trim())}</div>`;
+  }
+
+  const html = renderMarkdown(mainText) + footerHtml;
+
   msgs.insertAdjacentHTML('beforeend', `
     <div class="msg-row">
       <div class="avatar bot">HG</div>
-      <div class="msg-col">
+      <div class="msg-col" style="max-width:88%">
         <div class="bubble bot ${isUrgent ? 'alert-urgent' : ''}">${html}</div>
         <div class="msg-time">${ts()}</div>
       </div>
@@ -525,40 +593,124 @@ function appendBotMsg(text) {
   setTimeout(() => document.getElementById('progress').style.width = '0%', 1500);
 }
 
-// ── Markdown-lite renderer ──────────────────────────────────────────────────
+// ── Markdown renderer — section-aware ───────────────────────────────────────
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Map ## headings to visual style class
+const HEADING_STYLE = {
+  '⚠️': 'warning',
+  '🚨': 'danger',
+  '👤': 'purple',
+};
+
+function headingClass(text) {
+  for (const [emoji, cls] of Object.entries(HEADING_STYLE)) {
+    if (text.includes(emoji)) return cls;
+  }
+  return '';
+}
+
+function isEmergencyHeading(text) {
+  return text.includes('🚑') || text.includes('Emergency') || text.includes('emergency');
+}
+
+// Render a list of lines (all bullet or all numbered) into HTML
+function renderLines(lines) {
+  if (!lines.length) return '';
+  const isOrdered = /^\d+\./.test(lines[0]);
+  const tag = isOrdered ? 'ol' : 'ul';
+  const items = lines.map(l => {
+    const text = l.replace(/^[-*•]\s+/, '').replace(/^\d+\.\s+/, '');
+    // inline bold inside list items
+    return '<li>' + text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</li>';
+  }).join('');
+  return `<${tag}>${items}</${tag}>`;
+}
+
 function renderMarkdown(raw) {
-  let s = escHtml(raw);
-  // Bold
-  s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // Horizontal rule (--- or ***)
-  s = s.replace(/^(---|===|\*\*\*)$/gm, '<hr>');
-  // Headers ## or ###
-  s = s.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
-  s = s.replace(/^##\s+(.+)$/gm,  '<h4>$1</h4>');
-  // Emoji callouts (lines starting with 🚨 ⚕ ⚠)
-  s = s.replace(/^(🚨[^\n]+)$/gm, '<p class="footer-note">$1</p>');
-  s = s.replace(/^(⚕[^\n]+)$/gm,  '<p class="footer-note">$1</p>');
-  // Bullet list
-  const lines = s.split('\n');
-  const out = []; let inList = false;
-  for (const line of lines) {
-    if (/^[-*•]\s/.test(line)) {
-      if (!inList) { out.push('<ul>'); inList = true; }
-      out.push('<li>' + line.replace(/^[-*•]\s/, '') + '</li>');
-    } else if (/^\d+\.\s/.test(line)) {
-      if (!inList) { out.push('<ol>'); inList = true; }
-      out.push('<li>' + line.replace(/^\d+\.\s/, '') + '</li>');
+  // Split into ## sections
+  const sectionRegex = /^## (.+)$/m;
+  const parts = raw.split(/^(?=## )/m);
+  let html = '';
+
+  for (const part of parts) {
+    if (!part.trim()) continue;
+
+    const lines = part.split('\n');
+    const firstLine = lines[0].trim();
+
+    // Is this a ## section?
+    if (firstLine.startsWith('## ')) {
+      const heading = escHtml(firstLine.replace(/^## /, ''));
+      const hClass  = headingClass(heading);
+      const isEmerg = isEmergencyHeading(heading);
+      const bodyLines = lines.slice(1);
+
+      let sectionHtml = `<div class="section${isEmerg ? ' is-emergency' : ''}">`;
+      sectionHtml += `<div class="sec-heading ${hClass}">${heading}</div>`;
+      sectionHtml += renderSectionBody(bodyLines);
+      sectionHtml += `</div>`;
+      html += sectionHtml;
     } else {
-      if (inList) { out.push(inList === 'ol' ? '</ol>' : '</ul>'); inList = false; }
-      out.push(line.trim() ? '<p>' + line + '</p>' : '');
+      // Content before first ## heading (e.g. emergency callout line)
+      const escaped = escHtml(part.trim()).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      if (escaped) html += `<p style="margin-bottom:10px">${escaped}</p>`;
     }
   }
-  if (inList) out.push('</ul>');
-  return out.join('');
+
+  return html || escHtml(raw);
+}
+
+// Render the body of a ## section, grouping **sub-headings** with their bullets
+function renderSectionBody(lines) {
+  let html = '';
+  let currentSubLabel = null;
+  let pendingLines = [];
+
+  function flushGroup() {
+    if (!pendingLines.length) return;
+    const listHtml = renderLines(pendingLines.filter(l => l.trim()));
+    if (currentSubLabel) {
+      html += `<div class="sub-group">
+        <div class="sub-label">${escHtml(currentSubLabel)}</div>
+        ${listHtml}
+      </div>`;
+    } else {
+      html += listHtml;
+    }
+    pendingLines = [];
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // **Sub-heading** — bold line on its own (not a bullet)
+    const subMatch = line.match(/^\*\*(.+)\*\*$/);
+    if (subMatch) {
+      flushGroup();
+      currentSubLabel = subMatch[1];
+      continue;
+    }
+
+    // Bullet or numbered line
+    if (/^[-*•]\s/.test(line) || /^\d+\./.test(line)) {
+      pendingLines.push(line);
+      continue;
+    }
+
+    // Plain text line inside section
+    flushGroup();
+    currentSubLabel = null;
+    html += `<p style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${
+      escHtml(line).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    }</p>`;
+  }
+
+  flushGroup();
+  return html;
 }
 
 // ── API call ────────────────────────────────────────────────────────────────

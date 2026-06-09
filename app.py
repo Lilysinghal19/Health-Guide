@@ -25,10 +25,8 @@ chatbot = DynamicHealthChatbot(max_history_messages=10)
 
 # Configure Gemini from environment on startup
 _config = GeminiConfig(
-    credentials_path=os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", ""),
-    project=os.environ.get("GOOGLE_CLOUD_PROJECT", ""),
-    location=os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1"),
-    model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+    api_key=os.getenv("GOOGLE_API_KEY", ""),
+    model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 )
 chatbot.configure(_config)
 

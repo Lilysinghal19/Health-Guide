@@ -217,56 +217,71 @@ def _build_system_prompt() -> str:
 
 ━━━ LANGUAGE RULE ━━━
 Detect the language of the user's message and reply in that SAME language.
-- If the user writes in Hindi (e.g. "mujhe bukhar hai" or Devanagari), reply fully in Hindi.
-- If the user writes in English, reply in English.
-- If mixed (Hinglish), reply in Hinglish matching their style.
-- Apply this rule to ALL text in your response including headings, bullets, and the footer.
+- Hindi text or Devanagari → reply fully in Hindi.
+- English → reply in English.
+- Hinglish → reply in Hinglish matching their style.
+- Translate ALL parts of your response: headings, bullets, footer.
+- Hindi section headings: "## क्या हो सकता है", "## अभी क्या करें", "## ⚠️ डॉक्टर कब दिखाएं", "## 📋 आपकी स्थिति के लिए नोट"
 
 ━━━ CONTENT RULES (non-negotiable) ━━━
-1. NEVER name any medicine, drug, or dosage — not even common ones like paracetamol or ibuprofen.
-2. NEVER diagnose. Say "may be consistent with" / "ho sakta hai" — never "you have" / "aapko X hai".
-3. Reason dynamically about the specific symptoms, their combination, severity, duration, and age.
-   Do NOT give generic advice — tailor every bullet to what this specific person described.
-4. For ANY emergency (snake bite, chest pain, heavy bleeding, breathing difficulty, poisoning, burns):
-   Start with "🚨 Emergency — call 112 / go to hospital now." then list every first-aid step in order.
-5. Adapt ALL advice to existing conditions mentioned (diabetes, asthma, pregnancy, etc.).
-6. Use your full medical knowledge — do not restrict yourself to only the examples below.
-   The knowledge base is a reference, not a limit. Reason about any symptom or situation presented.
+1. NEVER name any medicine, drug, or dosage — not even paracetamol, ibuprofen, ORS brands.
+2. NEVER diagnose. Use "may be consistent with" / "ho sakta hai" — never "you have".
+3. Reason dynamically — tailor every response to the specific symptoms, severity, duration, age.
+4. Emergencies (snake bite, chest pain, heavy bleeding, breathing difficulty, burns, poisoning):
+   Start with "🚨 Emergency — call 112 / go to hospital now." then give every first-aid step.
+5. Adapt advice to any existing conditions mentioned.
+6. Use your full medical knowledge — the reference below is a starting point, not a limit.
 
-━━━ OUTPUT FORMAT (follow exactly, every time) ━━━
+━━━ TWO RESPONSE MODES ━━━
+
+The user's message will be tagged by the app as either [FRESH ANALYSIS] or [FOLLOW-UP].
+
+MODE 1 — [FRESH ANALYSIS]
+Use the full structured format:
 
 ## What This May Be
-- [reason about the specific symptom combination — 1-3 short bullets]
+- [1-3 bullets reasoning about the specific symptom combination]
 
 ## What To Do Now
 
-**[Pick only relevant categories from: Rest, Hydration, Fever Care, Throat Care, Steam Inhalation,
-Nutrition, Wound Care, Burn Care, Skin Care, Breathing, Positioning, Emergency First Aid, Monitoring]**
-- [specific, actionable bullet tailored to their symptoms]
-- [specific, actionable bullet]
+**[Relevant category e.g. Rest / Hydration / Fever Care / Throat Care / Steam / Nutrition / Wound Care]**
+- [specific actionable bullet]
+- [specific actionable bullet]
 
 **[Next relevant category]**
 - [bullet]
-- [bullet]
 
 ## ⚠️ When To See a Doctor
-- [concrete specific warning sign for their situation]
-- [another specific sign]
+- [specific concrete warning sign]
+- [another sign]
 
 ## 📋 Note For Your Condition
-(Include ONLY if an existing condition like diabetes, asthma, pregnancy was mentioned)
-- [how their condition changes the advice above]
+(Only if an existing condition was mentioned)
+- [condition-specific adaptation]
+
+───────────────────────────────────────────────
+
+MODE 2 — [FOLLOW-UP]
+This is a conversational question about something already discussed.
+DO NOT repeat the full symptom analysis. DO NOT use the structured format.
+Instead: give a SHORT, direct, conversational answer to exactly what was asked.
+- 2-5 sentences maximum.
+- Match the tone: if they ask casually in Hindi, reply casually in Hindi.
+- You have the full conversation history — refer back to it naturally.
+- Examples of follow-up questions and how to handle them:
+  * "aur kya kar sakte hain?" → add 2-3 extra tips not already mentioned, conversationally
+  * "kya 5 din mein theek ho jaungi?" → give an honest, warm, realistic answer about recovery time
+  * "why does fever happen?" → explain briefly in simple language
+  * "is this serious?" → reassure or escalate based on what you already know about them
+  * "what if it gets worse?" → tell them specifically what signs to watch for
 
 ━━━ FORMATTING RULES ━━━
-- ## for section headings, **bold** for sub-category labels.
-- Every point starts with - (a bullet). One sentence per bullet. No paragraphs.
-- Blank line between each **bold category** block.
-- Nothing written outside the four sections above.
-- In Hindi responses: translate headings too (e.g. "## क्या हो सकता है", "## अभी क्या करें", "## ⚠️ डॉक्टर कब दिखाएं").
+- FRESH ANALYSIS: ## headings, **bold** sub-labels, bullet points, blank line between categories.
+- FOLLOW-UP: plain conversational text only — no ## headings, no bullet lists, no bold labels.
+- One sentence per bullet (in structured mode). No paragraphs in structured mode.
+- Nothing outside the four sections in structured mode.
 
 ━━━ REFERENCE KNOWLEDGE ━━━
-Use this as a starting reference. Apply your own reasoning beyond it for any situation not covered.
-
 {HEALTH_KNOWLEDGE}
 """
 
@@ -308,14 +323,23 @@ class DynamicHealthChatbot:
             return self._missing_llm_message()
 
         flags = analyze_health_info(health_info)
+        is_followup = self._is_followup(user_message)
 
-        full_user_turn = (
-            f"Patient information:\n{health_info.to_prompt_context()}\n\n"
-            f"Risk flags: {flags}\n\n"
-            f"Question: {user_message}"
-        )
+        if is_followup:
+            # Conversational follow-up: just pass the raw message.
+            # The model already has the full symptom context in history —
+            # re-injecting it every turn is what caused the repeated full analysis.
+            user_turn = f"[FOLLOW-UP] {user_message}"
+        else:
+            # Fresh analysis or explicit symptom question: inject full context.
+            user_turn = (
+                f"[FRESH ANALYSIS]\n"
+                f"Patient information:\n{health_info.to_prompt_context()}\n\n"
+                f"Risk flags: {flags}\n\n"
+                f"Request: {user_message}"
+            )
 
-        self._history.append({"role": "user", "parts": [{"text": full_user_turn}]})
+        self._history.append({"role": "user", "parts": [{"text": user_turn}]})
 
         max_entries = self.max_history_messages * 2
         if len(self._history) > max_entries:
@@ -330,6 +354,57 @@ class DynamicHealthChatbot:
 
         self._history.append({"role": "model", "parts": [{"text": answer}]})
         return self._add_safety_footer(answer, flags)
+
+    def _is_followup(self, message: str) -> bool:
+        """
+        Returns True if the message is a conversational follow-up
+        (a question about something already discussed) rather than
+        a fresh symptom report or explicit analysis request.
+        Only treated as fresh if: it's the first message, or it
+        looks like a new symptom report, or the user clicked Analyze.
+        """
+        # First message is always fresh
+        if not self._history:
+            return False
+
+        msg = message.lower().strip()
+
+        # Explicit analysis trigger phrases (fresh)
+        fresh_triggers = [
+            "analyze", "analyse", "my symptoms", "mere symptoms",
+            "mujhe", "mujhe hai", "meri problem", "main bimar",
+            "i have", "i am feeling", "i feel", "i'm feeling",
+        ]
+        if any(t in msg for t in fresh_triggers):
+            return False
+
+        # Short conversational signals (follow-up)
+        followup_signals = [
+            "aur", "aur kya", "kya aur", "or kya", "what else",
+            "theek", "ठीक", "kab", "kitne din", "how long", "how many days",
+            "will i", "kya main", "kyun", "why", "kyunki", "because",
+            "batao", "bataiye", "tell me more", "explain", "samjhao",
+            "achha", "okay", "ok", "haan", "yes", "no", "nahi",
+            "kya ye", "is this", "sach mein", "really", "seriously",
+            "kya yeh normal", "is it normal", "kya yahi", "thoda aur",
+            "aage", "phir kya", "then what", "uske baad",
+        ]
+        if any(s in msg for s in followup_signals):
+            return True
+
+        # Short messages (under 6 words) with no symptom keywords are likely follow-ups
+        word_count = len(msg.split())
+        symptom_keywords = {
+            "fever", "bukhar", "cough", "khansi", "pain", "dard", "vomit",
+            "ulti", "headache", "sar", "diarrhea", "dast", "rash", "bite",
+            "bleed", "burn", "chest", "breathe", "saans", "wound", "injury",
+        }
+        has_symptom = any(kw in msg for kw in symptom_keywords)
+
+        if word_count <= 6 and not has_symptom:
+            return True
+
+        return False
 
     def clear_history(self) -> None:
         self._history.clear()

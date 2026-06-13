@@ -3,816 +3,644 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HealthGuide — Safe Self-Care Advisor</title>
+<title>HealthGuide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:            #F6F3EE;
-  --surface:       #FFFFFF;
-  --surface2:      #EFECE5;
-  --surface3:      #E8E4DB;
-  --border:        #DDD8CE;
-  --border-strong: #BEB9AE;
-  --text:          #1C1917;
-  --text-muted:    #6B655E;
-  --text-faint:    #A09890;
-  --accent:        #1F5C35;
-  --accent-light:  #E8F2EB;
-  --accent-mid:    #3A8A52;
-  --accent-hover:  #174A2A;
-  --danger:        #8B1A1A;
-  --danger-light:  #FEF1F1;
-  --danger-border: #EDBBBB;
-  --warning:       #7A4A18;
-  --warning-light: #FDF5EC;
-  --warning-border:#EAC98A;
-  --info-light:    #EDF5FE;
-  --info-border:   #AACFF0;
-  --radius-sm:     6px;
-  --radius:        10px;
-  --radius-lg:     16px;
-  --shadow-sm:     0 1px 2px rgba(0,0,0,.05);
-  --shadow:        0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --font-serif:    'DM Serif Display', Georgia, serif;
-  --font-sans:     'DM Sans', system-ui, sans-serif;
+  --bg: #F7F4EF;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #DDD9D0;
+  --border-strong: #C4BFB3;
+  --text: #1A1714;
+  --text-muted: #6B6560;
+  --text-faint: #9E9890;
+  --accent: #2C5F2E;
+  --accent-light: #EBF2EB;
+  --accent-mid: #4A8F4D;
+  --danger: #8B2020;
+  --danger-light: #FDF0F0;
+  --danger-border: #E8BABA;
+  --warning: #7A4F1A;
+  --warning-light: #FDF6EC;
+  --warning-border: #EDCF9A;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 14px;
-  line-height: 1.6;
-  height: 100dvh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* ── Header ── */
-.app-header {
+header {
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 24px;
-  background: var(--surface);
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.logo-mark {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: var(--accent); display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.logo-mark svg { color: white; }
-.header-text h1 { font-family: var(--font-serif); font-size: 19px; font-weight: 400; }
-.header-text p  { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-.no-rx-badge {
-  margin-left: auto; font-size: 11px; font-weight: 500;
-  padding: 4px 10px; border-radius: 20px;
-  background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border);
-}
-
-/* ── Body split ── */
-.app-body {
-  display: grid;
-  grid-template-columns: 356px 1fr;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ── Sidebar ── */
-.sidebar {
   background: var(--surface);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.sidebar-inner { padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; }
-
-.sec-label {
-  font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
-  text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
-/* Chip grid */
-.chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-.chip {
-  font-family: var(--font-sans); font-size: 12.5px;
-  padding: 4px 11px; border-radius: 20px;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text-muted); cursor: pointer;
-  transition: border-color .12s, background .12s, color .12s;
-  user-select: none;
+.header-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 1px solid #C5DFC5;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.chip:hover { border-color: var(--border-strong); color: var(--text); }
-.chip.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent-mid); font-weight: 500; }
-.chip.is-danger { border-color: var(--danger-border); color: var(--danger); }
-.chip.is-danger.active { background: var(--danger-light); }
+.header-icon svg { color: var(--accent); }
 
-/* Fields */
-.field { display: flex; flex-direction: column; gap: 5px; }
-.field label { font-size: 12px; color: var(--text-muted); }
-.field label .opt { color: var(--text-faint); font-size: 11px; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-input[type=text], input[type=number], select, textarea {
-  font-family: var(--font-sans); font-size: 13px;
-  padding: 7px 10px; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--surface);
-  color: var(--text); width: 100%;
-  transition: border-color .12s, box-shadow .12s;
+header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  font-weight: 400;
 }
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--accent-mid);
-  box-shadow: 0 0 0 3px rgba(31,92,53,.1);
+
+header p {
+  font-size: 12px;
+  color: var(--text-muted);
 }
-textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
-select { cursor: pointer; }
 
-/* Divider */
-hr.div { border: none; border-top: 1px solid var(--border); }
-
-/* Buttons */
-.btn-analyze {
-  width: 100%; padding: 11px; border: none; cursor: pointer;
-  background: var(--accent); color: white;
-  font-family: var(--font-serif); font-size: 15px; letter-spacing: .02em;
-  border-radius: var(--radius); transition: background .13s, transform .1s;
+.badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid var(--warning-border);
+  white-space: nowrap;
 }
-.btn-analyze:hover  { background: var(--accent-hover); }
-.btn-analyze:active { transform: scale(.98); }
-.btn-analyze:disabled { background: var(--border-strong); cursor: not-allowed; }
 
-.btn-clear {
-  width: 100%; padding: 7px; background: none;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); cursor: pointer;
-  transition: all .13s;
-}
-.btn-clear:hover { background: var(--surface2); color: var(--text); }
-
-/* ── Chat pane ── */
-.chat-pane { display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-
-/* Progress bar */
-.progress-bar { height: 3px; background: var(--border); flex-shrink: 0; }
-.progress-fill { height: 100%; background: var(--accent-mid); border-radius: 0 2px 2px 0; transition: width .35s ease; }
-
-/* Messages */
+/* ── Chat area ── */
 .chat-messages {
-  flex: 1; overflow-y: auto; padding: 22px 24px;
-  display: flex; flex-direction: column; gap: 18px;
-  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
 }
-.chat-messages::-webkit-scrollbar { width: 5px; }
+
+.chat-messages::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Message bubbles ── */
+.msg-wrap { display: flex; gap: 10px; }
+.msg-wrap.user { flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  flex-shrink: 0; margin-top: 2px;
+}
+.msg-avatar.bot { background: var(--accent-light); color: var(--accent); border: 1px solid #C5DFC5; }
+.msg-avatar.user-av { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+.bubble {
+  max-width: 82%;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 13.5px;
+  line-height: 1.75;
+  box-shadow: var(--shadow);
+}
+.bubble.bot {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+}
+.bubble.user {
+  background: var(--accent);
+  color: white;
+  border-top-right-radius: 4px;
+}
+.bubble.urgent {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 2px solid var(--danger-border);
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+
+/* Bubble content formatting */
+.bubble p { margin-bottom: 6px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { padding-left: 20px; margin: 6px 0; }
+.bubble li { margin-bottom: 4px; }
+.bubble strong { font-weight: 600; }
+.bubble h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--accent);
+  margin: 12px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--accent-light);
+}
+.bubble h2:first-child { margin-top: 0; }
+.bubble.urgent h2 { color: var(--danger); border-bottom-color: var(--danger-border); }
+.bubble .clarifying-qs {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.bubble .clarifying-qs strong { color: var(--text-muted); font-size: 12px; }
+.bubble hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+.msg-time { font-size: 11px; color: var(--text-faint); margin-top: 4px; padding: 0 2px; }
+.msg-wrap.user .msg-time { text-align: right; }
+
+/* Typing indicator */
+.typing { display: flex; align-items: center; gap: 4px; padding: 12px 14px; }
+.typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-faint);
+  animation: bounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
 
 /* Empty state */
 .empty-state {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px;
-  color: var(--text-faint); text-align: center; padding: 32px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%;
+  gap: 14px; color: var(--text-faint);
+  text-align: center;
 }
 .empty-state svg { opacity: .3; }
-.empty-state h3 { font-family: var(--font-serif); font-size: 18px; font-weight: 400; color: var(--text-muted); }
-.empty-state p  { font-size: 13px; max-width: 300px; line-height: 1.7; }
-
-/* Message row */
-.msg-row { display: flex; gap: 10px; align-items: flex-start; }
-.msg-row.from-user { flex-direction: row-reverse; }
-
-.avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  font-size: 11px; font-weight: 600; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; margin-top: 2px;
+.empty-state h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-muted);
 }
-.avatar.bot  { background: var(--accent-light); color: var(--accent); border: 1px solid #BDD9C5; }
-.avatar.user { background: var(--surface3); color: var(--text-muted); border: 1px solid var(--border); }
-
-.msg-col { display: flex; flex-direction: column; max-width: 78%; gap: 3px; }
-.from-user .msg-col { align-items: flex-end; }
-
-.bubble {
-  padding: 14px 16px; border-radius: var(--radius-lg);
-  font-size: 13.5px; line-height: 1.75;
-  box-shadow: var(--shadow-sm); animation: fadeUp .2s ease;
+.empty-state p { font-size: 13px; max-width: 320px; line-height: 1.7; }
+.empty-state .hint-chips {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  margin-top: 4px;
 }
-@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-
-.bubble.bot  { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; }
-.bubble.user { background: var(--accent); color: white; border-top-right-radius: 4px; }
-.bubble.alert-urgent { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); border-radius: var(--radius); }
-.bubble.alert-info   { background: var(--info-light); color: #1A4A7A; border: 1px solid var(--info-border); border-radius: var(--radius); }
-
-/* ── Structured response sections ── */
-.bubble .section {
-  margin-bottom: 14px;
-}
-.bubble .section:last-child { margin-bottom: 0; }
-
-/* ## section heading */
-.bubble .sec-heading {
-  display: flex; align-items: center; gap-7px;
-  font-family: var(--font-serif); font-size: 15px; font-weight: 400;
-  color: var(--accent); margin-bottom: 8px; padding-bottom: 5px;
-  border-bottom: 1.5px solid var(--accent-light);
-}
-.bubble .sec-heading.warning { color: var(--warning); border-bottom-color: var(--warning-border); }
-.bubble .sec-heading.danger  { color: var(--danger);  border-bottom-color: var(--danger-border); }
-.bubble .sec-heading.purple  { color: #5B3FA6; border-bottom-color: #E0D4F7; }
-
-/* **bold** sub-heading inside a section */
-.bubble .sub-group { margin-bottom: 10px; }
-.bubble .sub-label {
-  display: inline-block; font-size: 12px; font-weight: 600;
-  color: var(--text-muted); background: var(--surface2);
-  padding: 2px 9px; border-radius: 20px; margin-bottom: 5px;
+.empty-state .hint-chip {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
   border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.empty-state .hint-chip:hover {
+  border-color: var(--accent-mid);
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
-/* Lists */
-.bubble ul { list-style: none; padding: 0; margin: 0; }
-.bubble ol { padding-left: 20px; margin: 0; }
-.bubble ul li {
-  padding: 3px 0 3px 18px; position: relative;
-  color: var(--text); font-size: 13px; line-height: 1.65;
-  border-bottom: 1px solid var(--surface2);
-}
-.bubble ul li:last-child { border-bottom: none; }
-.bubble ul li::before {
-  content: ''; position: absolute; left: 4px; top: 11px;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent-mid);
-}
-.bubble ol li {
-  color: var(--text); font-size: 13px; line-height: 1.65; margin-bottom: 4px;
-  padding-left: 3px;
-}
-
-/* Emergency ordered list gets red numbering */
-.bubble .section.is-emergency ol { counter-reset: emerg; list-style: none; padding: 0; }
-.bubble .section.is-emergency ol li {
-  counter-increment: emerg; padding-left: 28px; position: relative; margin-bottom: 6px;
-  background: rgba(139,26,26,.04); border-radius: 6px; padding-top: 4px; padding-bottom: 4px;
-}
-.bubble .section.is-emergency ol li::before {
-  content: counter(emerg); position: absolute; left: 6px; top: 4px;
-  width: 16px; height: 16px; border-radius: 50%;
-  background: var(--danger); color: white;
-  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-  line-height: 16px; text-align: center;
-}
-
-/* Footer / disclaimer */
-.bubble .resp-footer {
-  font-size: 11.5px; color: var(--text-faint);
-  margin-top: 12px; padding-top: 8px;
-  border-top: 1px dashed var(--border);
-}
-.bubble hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
-
-.msg-time { font-size: 11px; color: var(--text-faint); padding: 0 2px; }
-
-/* Typing */
-.typing-dots { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
-.typing-dots span {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
-  animation: dot-bounce 1.3s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: .2s; }
-.typing-dots span:nth-child(3) { animation-delay: .4s; }
-@keyframes dot-bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-6px); } }
-
-/* Input bar */
-.chat-input-bar {
-  padding: 12px 20px; border-top: 1px solid var(--border);
-  background: var(--surface); display: flex; gap: 10px; align-items: flex-end;
+/* ── Input area ── */
+.chat-input-wrapper {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
   flex-shrink: 0;
+  padding: 14px 24px;
 }
-.chat-input-bar textarea {
-  flex: 1; min-height: 40px; max-height: 120px;
-  padding: 9px 13px; resize: none; border-radius: 20px;
-  font-size: 13.5px; line-height: 1.5; overflow: auto;
-}
-.btn-send {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--accent); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  transition: background .13s, transform .1s;
-}
-.btn-send:hover  { background: var(--accent-hover); }
-.btn-send:active { transform: scale(.9); }
-.btn-send:disabled { background: var(--border-strong); cursor: not-allowed; }
-.btn-send svg { color: white; }
-.btn-clear-chat {
-  background: none; border: none; color: var(--text-faint); font-size: 12px;
-  cursor: pointer; padding: 4px 6px; border-radius: 6px; align-self: center;
-  transition: all .13s; white-space: nowrap;
-}
-.btn-clear-chat:hover { background: var(--surface2); color: var(--text-muted); }
 
-/* Urgency banner */
-.urgency-banner {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 10px 14px; border-radius: var(--radius); font-size: 12.5px;
-  animation: fadeUp .2s ease;
+.chat-input-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
 }
-.urgency-banner.urgent  { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); }
-.urgency-banner.caution { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
-.urgency-banner svg { flex-shrink: 0; margin-top: 1px; }
+
+.chat-input-inner textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 130px;
+  padding: 10px 16px;
+  resize: none;
+  border-radius: 22px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: auto;
+  transition: border-color .15s;
+}
+.chat-input-inner textarea:focus {
+  outline: none;
+  border-color: var(--accent-mid);
+  box-shadow: 0 0 0 3px rgba(44,95,46,0.08);
+}
+.chat-input-inner textarea::placeholder { color: var(--text-faint); }
+
+.send-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, transform .1s;
+}
+.send-btn:hover { background: var(--accent-mid); }
+.send-btn:active { transform: scale(.93); }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; }
+.send-btn svg { color: white; }
+
+.clear-chat-btn {
+  background: none; border: none;
+  color: var(--text-faint); font-size: 12px;
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 6px; transition: all .15s;
+  white-space: nowrap; align-self: center;
+}
+.clear-chat-btn:hover { background: var(--surface2); color: var(--text-muted); }
+
+/* Footer disclaimer */
+.footer-disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  padding: 6px 0 2px;
+  max-width: 860px;
+  margin: 0 auto;
+}
 </style>
 </head>
 <body>
 
 <!-- Header -->
-<header class="app-header">
-  <div class="logo-mark">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-    </svg>
+<header>
+  <div class="header-icon">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
   </div>
-  <div class="header-text">
+  <div>
     <h1>HealthGuide</h1>
-    <p>Safe self-care advice · No medicines recommended · Not a substitute for professional care</p>
+    <p>Non-medication self-care guidance</p>
   </div>
-  <span class="no-rx-badge">⚕ No prescriptions</span>
+  <span class="badge">⚕️ No medicines recommended</span>
 </header>
 
-<!-- Body -->
-<div class="app-body">
-
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <!-- Symptoms -->
-      <div>
-        <div class="sec-label">Symptoms <span style="font-size:10px;text-transform:none;color:var(--text-faint)">(tap to select)</span></div>
-        <div class="chip-grid" id="symptom-chips">
-          <span class="chip" data-val="Fever">Fever</span>
-          <span class="chip" data-val="Cough">Cough</span>
-          <span class="chip" data-val="Headache">Headache</span>
-          <span class="chip" data-val="Fatigue">Fatigue</span>
-          <span class="chip" data-val="Sore throat">Sore throat</span>
-          <span class="chip" data-val="Runny nose">Runny nose</span>
-          <span class="chip" data-val="Body aches">Body aches</span>
-          <span class="chip" data-val="Nausea">Nausea</span>
-          <span class="chip" data-val="Vomiting">Vomiting</span>
-          <span class="chip" data-val="Diarrhea">Diarrhea</span>
-          <span class="chip is-danger" data-val="Chest pain">Chest pain</span>
-          <span class="chip is-danger" data-val="Dizziness">Dizziness</span>
-        </div>
-      </div>
-
-      <!-- Free text -->
-      <div class="field">
-        <label>Describe in your own words <span class="opt">(injuries, bites, unusual…)</span></label>
-        <textarea id="details" placeholder="e.g. snake bite on left ankle, sharp pain in side, swallowed something…" rows="3"></textarea>
-      </div>
-
-      <hr class="div">
-
-      <!-- Conditions -->
-      <div>
-        <div class="sec-label">Existing conditions</div>
-        <div class="chip-grid" id="cond-chips">
-          <span class="chip active" data-val="None">None</span>
-          <span class="chip" data-val="Diabetes">Diabetes</span>
-          <span class="chip" data-val="Hypertension">Hypertension</span>
-          <span class="chip" data-val="Asthma">Asthma</span>
-          <span class="chip" data-val="Heart disease">Heart disease</span>
-          <span class="chip" data-val="Pregnancy">Pregnancy</span>
-          <span class="chip" data-val="Kidney disease">Kidney disease</span>
-          <span class="chip" data-val="Immune system condition">Immune condition</span>
-        </div>
-      </div>
-
-      <hr class="div">
-
-      <!-- Details row -->
-      <div class="row2">
-        <div class="field">
-          <label>Age <span class="opt">(optional)</span></label>
-          <input type="number" id="age" placeholder="e.g. 34" min="0" max="120">
-        </div>
-        <div class="field">
-          <label>Breathing difficulty</label>
-          <select id="breathing">
-            <option value="No">No</option>
-            <option value="Yes">Yes</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row2">
-        <div class="field">
-          <label>Duration</label>
-          <select id="duration">
-            <option>Less than 1 day</option>
-            <option selected>1 to 3 days</option>
-            <option>4 to 7 days</option>
-            <option>More than 1 week</option>
-            <option>More than 2 weeks</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Severity</label>
-          <select id="severity">
-            <option>Mild</option>
-            <option>Moderate</option>
-            <option>Severe</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Buttons -->
-      <button class="btn-analyze" id="btn-analyze" onclick="analyze()">Analyze my symptoms</button>
-      <button class="btn-clear"   onclick="clearAll()">Clear everything</button>
-
+<!-- Messages -->
+<div class="chat-messages" id="chat-messages">
+  <div class="empty-state" id="empty-state">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <h3>How can I help you today?</h3>
+    <p>Describe your symptoms in any language — English, Hindi, or Hinglish. I'll guide you with safe self-care advice.</p>
+    <div class="hint-chips">
+      <span class="hint-chip" onclick="useHint(this)">Mujhe bukhar hai</span>
+      <span class="hint-chip" onclick="useHint(this)">I have a headache</span>
+      <span class="hint-chip" onclick="useHint(this)">Pet mein dard ho raha hai</span>
+      <span class="hint-chip" onclick="useHint(this)">Severe stomach pain</span>
     </div>
-  </aside>
+  </div>
+</div>
 
-  <!-- ── Chat pane ── -->
-  <section class="chat-pane">
-    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
-
-    <div class="chat-messages" id="chat-messages">
-      <div class="empty-state" id="empty-state">
-        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
-          <path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-        </svg>
-        <h3>How can I help you today?</h3>
-        <p>Select your symptoms on the left, then click <strong>Analyze my symptoms</strong> or type a question below.</p>
-      </div>
-    </div>
-
-    <div class="chat-input-bar">
-      <textarea id="chat-input"
-        placeholder="Ask a follow-up question…"
-        rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
-        oninput="autoGrow(this)"></textarea>
-      <button class="btn-send" id="btn-send" onclick="sendMessage()" title="Send">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
-          <path d="m22 2-11 11M22 2 15 22l-4-9-9-4 20-7z"/>
-        </svg>
-      </button>
-      <button class="btn-clear-chat" onclick="clearChat()">Clear chat</button>
-    </div>
-  </section>
+<!-- Input -->
+<div class="chat-input-wrapper">
+  <div class="chat-input-inner">
+    <textarea id="chat-input"
+      placeholder="Apne symptoms describe karein… / Describe your symptoms…"
+      rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+      oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="m22 2-11 11M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+    </button>
+    <button class="clear-chat-btn" onclick="clearChat()">Clear</button>
+  </div>
+  <div class="footer-disclaimer">Not a substitute for professional medical care · Call 112 in emergencies</div>
 </div>
 
 <script>
-// ── Chip logic ──────────────────────────────────────────────────────────────
-document.querySelectorAll('#symptom-chips .chip').forEach(c =>
-  c.addEventListener('click', () => { c.classList.toggle('active'); updateProgress(); })
-);
+// ── State ──
+let isStreaming = false;
 
-document.querySelectorAll('#cond-chips .chip').forEach(c =>
-  c.addEventListener('click', () => {
-    if (c.dataset.val === 'None') {
-      document.querySelectorAll('#cond-chips .chip').forEach(x => x.classList.remove('active'));
-      c.classList.add('active');
-    } else {
-      document.querySelector('#cond-chips [data-val="None"]').classList.remove('active');
-      c.classList.toggle('active');
-      if (!document.querySelectorAll('#cond-chips .chip.active').length)
-        document.querySelector('#cond-chips [data-val="None"]').classList.add('active');
-    }
-    updateProgress();
-  })
-);
-
-// ── Progress ────────────────────────────────────────────────────────────────
-function updateProgress() {
-  const syms = document.querySelectorAll('#symptom-chips .chip.active').length;
-  const detail = document.getElementById('details').value.trim().length;
-  const age = document.getElementById('age').value;
-  let p = 5;
-  if (syms > 0 || detail > 3) p = 40;
-  if (p >= 40 && age) p = 70;
-  if (p >= 40) p = Math.min(p + 10, 85);
-  document.getElementById('progress').style.width = p + '%';
-}
-document.getElementById('details').addEventListener('input', updateProgress);
-document.getElementById('age').addEventListener('input', updateProgress);
-
-// ── Collect form data ───────────────────────────────────────────────────────
-function collectHealthInfo() {
-  const symptoms   = [...document.querySelectorAll('#symptom-chips .chip.active')].map(c => c.dataset.val);
-  const conditions = [...document.querySelectorAll('#cond-chips .chip.active')].map(c => c.dataset.val);
-  const ageVal     = document.getElementById('age').value.trim();
-  return {
-    symptoms,
-    conditions: conditions.length ? conditions : ['None'],
-    age: ageVal && /^\d+$/.test(ageVal) ? parseInt(ageVal) : null,
-    duration: document.getElementById('duration').value,
-    severity: document.getElementById('severity').value,
-    breathing_difficulty: document.getElementById('breathing').value === 'Yes',
-    details: document.getElementById('details').value.trim(),
-  };
+// ── Hint chips ──
+function useHint(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  document.getElementById('chat-input').focus();
 }
 
-// ── Render helpers ──────────────────────────────────────────────────────────
-function ts() {
+// ── Time ──
+function now() {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// ── Remove empty state ──
 function removeEmpty() {
-  document.getElementById('empty-state')?.remove();
+  const e = document.getElementById('empty-state');
+  if (e) e.remove();
 }
 
-function setLoading(on) {
-  document.getElementById('btn-analyze').disabled = on;
-  document.getElementById('btn-send').disabled    = on;
+// ── Detect emergency text ──
+function isEmergency(text) {
+  const t = text.toLowerCase();
+  return (
+    t.includes('🚨') ||
+    t.includes('emergency') ||
+    t.includes('call 112') ||
+    t.includes('hospital immediately') ||
+    t.includes('hospital now') ||
+    t.includes('abhi hospital') ||
+    t.includes('turant hospital')
+  );
 }
 
-function appendUserMsg(text) {
-  removeEmpty();
-  const msgs = document.getElementById('chat-messages');
-  msgs.insertAdjacentHTML('beforeend', `
-    <div class="msg-row from-user">
-      <div class="avatar user">You</div>
-      <div class="msg-col">
-        <div class="bubble user">${escHtml(text)}</div>
-        <div class="msg-time">${ts()}</div>
-      </div>
-    </div>`);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+// ── Format markdown-ish text to HTML ──
+function formatText(raw) {
+  // Escape HTML
+  let text = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-function showTyping() {
-  removeEmpty();
-  const msgs = document.getElementById('chat-messages');
-  msgs.insertAdjacentHTML('beforeend', `
-    <div class="msg-row" id="typing-row">
-      <div class="avatar bot">HG</div>
-      <div class="bubble bot typing-dots"><span></span><span></span><span></span></div>
-    </div>`);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function removeTyping() {
-  document.getElementById('typing-row')?.remove();
-}
-
-function appendBotMsg(text) {
-  const msgs = document.getElementById('chat-messages');
-  const isUrgent = /🚨|emergency|immediately|call\s*(112|911|999|ambulance)/i.test(text);
-
-  // Separate the safety footer lines (⚕ / 🚨 lines after ---)
-  let mainText = text;
-  let footerHtml = '';
-  const footerMatch = text.match(/\n---\n([\s\S]+)$/);
-  if (footerMatch) {
-    mainText = text.slice(0, text.indexOf('\n---\n'));
-    footerHtml = `<div class="resp-footer">${escHtml(footerMatch[1].trim())}</div>`;
-  }
-
-  const html = renderMarkdown(mainText) + footerHtml;
-
-  msgs.insertAdjacentHTML('beforeend', `
-    <div class="msg-row">
-      <div class="avatar bot">HG</div>
-      <div class="msg-col" style="max-width:88%">
-        <div class="bubble bot ${isUrgent ? 'alert-urgent' : ''}">${html}</div>
-        <div class="msg-time">${ts()}</div>
-      </div>
-    </div>`);
-  msgs.scrollTop = msgs.scrollHeight;
-  document.getElementById('progress').style.width = '100%';
-  setTimeout(() => document.getElementById('progress').style.width = '0%', 1500);
-}
-
-// ── Markdown renderer — section-aware ───────────────────────────────────────
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// Map ## headings to visual style class
-const HEADING_STYLE = {
-  '⚠️': 'warning',
-  '🚨': 'danger',
-  '👤': 'purple',
-};
-
-function headingClass(text) {
-  for (const [emoji, cls] of Object.entries(HEADING_STYLE)) {
-    if (text.includes(emoji)) return cls;
-  }
-  return '';
-}
-
-function isEmergencyHeading(text) {
-  return text.includes('🚑') || text.includes('Emergency') || text.includes('emergency');
-}
-
-// Render a list of lines (all bullet or all numbered) into HTML
-function renderLines(lines) {
-  if (!lines.length) return '';
-  const isOrdered = /^\d+\./.test(lines[0]);
-  const tag = isOrdered ? 'ol' : 'ul';
-  const items = lines.map(l => {
-    const text = l.replace(/^[-*•]\s+/, '').replace(/^\d+\.\s+/, '');
-    // inline bold inside list items
-    return '<li>' + text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</li>';
-  }).join('');
-  return `<${tag}>${items}</${tag}>`;
-}
-
-function renderMarkdown(raw) {
-  // Split into ## sections
-  const sectionRegex = /^## (.+)$/m;
-  const parts = raw.split(/^(?=## )/m);
+  const lines = text.split('\n');
   let html = '';
+  let inUL = false;
+  let inOL = false;
+  let inClarifying = false;
 
-  for (const part of parts) {
-    if (!part.trim()) continue;
+  const closeLists = () => {
+    if (inUL) { html += '</ul>'; inUL = false; }
+    if (inOL) { html += '</ol>'; inOL = false; }
+  };
 
-    const lines = part.split('\n');
-    const firstLine = lines[0].trim();
+  const bold = s => s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-    // Is this a ## section?
-    if (firstLine.startsWith('## ')) {
-      const heading = escHtml(firstLine.replace(/^## /, ''));
-      const hClass  = headingClass(heading);
-      const isEmerg = isEmergencyHeading(heading);
-      const bodyLines = lines.slice(1);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
 
-      let sectionHtml = `<div class="section${isEmerg ? ' is-emergency' : ''}">`;
-      sectionHtml += `<div class="sec-heading ${hClass}">${heading}</div>`;
-      sectionHtml += renderSectionBody(bodyLines);
-      sectionHtml += `</div>`;
-      html += sectionHtml;
-    } else {
-      // Content before first ## heading (e.g. emergency callout line)
-      const escaped = escHtml(part.trim()).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      if (escaped) html += `<p style="margin-bottom:10px">${escaped}</p>`;
-    }
-  }
-
-  return html || escHtml(raw);
-}
-
-// Render the body of a ## section, grouping **sub-headings** with their bullets
-function renderSectionBody(lines) {
-  let html = '';
-  let currentSubLabel = null;
-  let pendingLines = [];
-
-  function flushGroup() {
-    if (!pendingLines.length) return;
-    const listHtml = renderLines(pendingLines.filter(l => l.trim()));
-    if (currentSubLabel) {
-      html += `<div class="sub-group">
-        <div class="sub-label">${escHtml(currentSubLabel)}</div>
-        ${listHtml}
-      </div>`;
-    } else {
-      html += listHtml;
-    }
-    pendingLines = [];
-  }
-
-  for (const rawLine of lines) {
-    const line = rawLine.trim();
-    if (!line) continue;
-
-    // **Sub-heading** — bold line on its own (not a bullet)
-    const subMatch = line.match(/^\*\*(.+)\*\*$/);
-    if (subMatch) {
-      flushGroup();
-      currentSubLabel = subMatch[1];
+    // --- separator → start clarifying questions block
+    if (trimmed === '---') {
+      closeLists();
+      if (!inClarifying) {
+        inClarifying = true;
+        html += '<div class="clarifying-qs">';
+      }
       continue;
     }
 
-    // Bullet or numbered line
-    if (/^[-*•]\s/.test(line) || /^\d+\./.test(line)) {
-      pendingLines.push(line);
+    // ## Heading
+    if (trimmed.startsWith('## ')) {
+      closeLists();
+      html += `<h2>${bold(trimmed.slice(3))}</h2>`;
       continue;
     }
 
-    // Plain text line inside section
-    flushGroup();
-    currentSubLabel = null;
-    html += `<p style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${
-      escHtml(line).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    }</p>`;
+    // Numbered list: "1. text"
+    const olMatch = trimmed.match(/^(\d+)[.)]\s+(.+)/);
+    if (olMatch) {
+      if (inUL) { html += '</ul>'; inUL = false; }
+      if (!inOL) { html += '<ol>'; inOL = true; }
+      html += `<li>${bold(olMatch[2])}</li>`;
+      continue;
+    }
+
+    // Bullet: "- text" or "* text" or "• text"
+    const bulletMatch = trimmed.match(/^[-*•]\s+(.+)/);
+    if (bulletMatch) {
+      if (inOL) { html += '</ol>'; inOL = false; }
+      if (!inUL) { html += '<ul>'; inUL = true; }
+      html += `<li>${bold(bulletMatch[1])}</li>`;
+      continue;
+    }
+
+    // Close open lists before a non-list line
+    closeLists();
+
+    // Empty line — skip
+    if (trimmed === '') continue;
+
+    // Regular paragraph
+    html += `<p>${bold(trimmed)}</p>`;
   }
 
-  flushGroup();
+  closeLists();
+  if (inClarifying) html += '</div>';
+
   return html;
 }
 
-// ── API call ────────────────────────────────────────────────────────────────
-async function callBackend(message, healthInfo) {
-  const res = await fetch('/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, health_info: healthInfo }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-  return data.reply;
+// ── Append a complete message ──
+function appendMessage(role, text) {
+  removeEmpty();
+  const msgs = document.getElementById('chat-messages');
+  const isUser = role === 'user';
+  const urgent = !isUser && isEmergency(text);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap' + (isUser ? ' user' : '');
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar ' + (isUser ? 'user-av' : 'bot');
+  avatar.textContent = isUser ? 'You' : 'HG';
+
+  const inner = document.createElement('div');
+  inner.style.cssText = 'display:flex;flex-direction:column;max-width:82%';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (isUser ? 'user' : (urgent ? 'urgent' : 'bot'));
+  bubble.innerHTML = isUser ? `<p>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>` : formatText(text);
+
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = now();
+
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  wrap.appendChild(avatar);
+  wrap.appendChild(inner);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  return bubble;
 }
 
-// ── Analyze ─────────────────────────────────────────────────────────────────
-async function analyze() {
-  const info = collectHealthInfo();
-  if (!info.symptoms.length && !info.details) {
-    shakeBtn(); return;
-  }
-  const summary = buildSummary(info);
-  appendUserMsg('Please analyze my symptoms and suggest safe self-care steps.\n\n' + summary);
-  await doAsk('Please analyze my symptoms and suggest safe self-care steps.', info);
+// ── Streaming bot bubble ──
+function createStreamingBubble() {
+  removeEmpty();
+  const msgs = document.getElementById('chat-messages');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap';
+  wrap.id = 'streaming-msg';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar bot';
+  avatar.textContent = 'HG';
+
+  const inner = document.createElement('div');
+  inner.style.cssText = 'display:flex;flex-direction:column;max-width:82%';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble bot';
+  bubble.id = 'streaming-bubble';
+
+  // Typing indicator while first chunk hasn't arrived
+  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = now();
+
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  wrap.appendChild(avatar);
+  wrap.appendChild(inner);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  return bubble;
 }
 
-function buildSummary(info) {
-  const parts = [];
-  if (info.symptoms.length) parts.push(`Symptoms: ${info.symptoms.join(', ')}`);
-  if (info.details)         parts.push(`Details: ${info.details}`);
-  if (!info.conditions.includes('None')) parts.push(`Conditions: ${info.conditions.join(', ')}`);
-  if (info.age)             parts.push(`Age: ${info.age}`);
-  parts.push(`Duration: ${info.duration}`, `Severity: ${info.severity}`);
-  if (info.breathing_difficulty) parts.push('Breathing difficulty: Yes');
-  return parts.join(' · ');
-}
-
-// ── Send follow-up ───────────────────────────────────────────────────────────
+// ── Send message ──
 async function sendMessage() {
-  const inp  = document.getElementById('chat-input');
+  if (isStreaming) return;
+  const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
   if (!text) return;
-  inp.value = ''; inp.style.height = 'auto';
-  appendUserMsg(text);
-  await doAsk(text, collectHealthInfo());
-}
+  inp.value = '';
+  inp.style.height = 'auto';
 
-// ── Core ask ─────────────────────────────────────────────────────────────────
-async function doAsk(message, healthInfo) {
-  setLoading(true); showTyping();
+  appendMessage('user', text);
+  setStreaming(true);
+
+  const bubble = createStreamingBubble();
+  let fullText = '';
+  let firstChunk = true;
+
   try {
-    const reply = await callBackend(message, healthInfo);
-    removeTyping(); appendBotMsg(reply);
+    const response = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        health_info: {}   // No sidebar — model asks for info via clarifying questions
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: 'Server error' }));
+      throw new Error(err.error || 'Server error');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (!payload) continue;
+
+        let parsed;
+        try { parsed = JSON.parse(payload); } catch { continue; }
+
+        if (parsed.error) {
+          bubble.innerHTML = `<p>⚠️ ${parsed.error}</p>`;
+          break;
+        }
+
+        if (parsed.chunk) {
+          if (firstChunk) {
+            bubble.innerHTML = ''; // clear typing indicator
+            firstChunk = false;
+          }
+          fullText += parsed.chunk;
+          // Re-render incrementally
+          bubble.innerHTML = formatText(fullText);
+          // Apply urgent styling if emergency detected
+          if (isEmergency(fullText)) {
+            bubble.className = 'bubble urgent';
+          }
+          document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        }
+
+        if (parsed.done) {
+          if (parsed.footer) {
+            fullText += parsed.footer;
+            bubble.innerHTML = formatText(fullText);
+          }
+          // Remove the streaming ID so it becomes a regular bubble
+          document.getElementById('streaming-msg').removeAttribute('id');
+          bubble.removeAttribute('id');
+          break;
+        }
+      }
+    }
   } catch (err) {
-    removeTyping();
-    appendBotMsg(`⚠️ Could not reach the server.\n\n**Error:** ${err.message}\n\nMake sure the Flask server is running (\`python app.py\`) and your \`.env\` file is configured.`);
-  } finally {
-    setLoading(false);
+    bubble.innerHTML = `<p>⚠️ Could not get a response. ${err.message}</p>`;
+    document.getElementById('streaming-msg')?.removeAttribute('id');
+    bubble.removeAttribute('id');
   }
+
+  setStreaming(false);
 }
 
-// ── Clear ────────────────────────────────────────────────────────────────────
-function clearAll() {
-  document.querySelectorAll('#symptom-chips .chip').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('#cond-chips .chip').forEach(c => c.classList.remove('active'));
-  document.querySelector('#cond-chips [data-val="None"]').classList.add('active');
-  document.getElementById('age').value      = '';
-  document.getElementById('breathing').value = 'No';
-  document.getElementById('duration').value  = '1 to 3 days';
-  document.getElementById('severity').value  = 'Mild';
-  document.getElementById('details').value   = '';
-  fetch('/clear', { method: 'POST' });
-  clearChat();
+function setStreaming(val) {
+  isStreaming = val;
+  document.getElementById('send-btn').disabled = val;
+  document.getElementById('chat-input').disabled = val;
 }
 
-async function clearChat() {
-  try { await fetch('/clear', { method: 'POST' }); } catch {}
-  document.getElementById('chat-messages').innerHTML = `
-    <div class="empty-state" id="empty-state">
-      <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
-        <path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-      </svg>
-      <h3>How can I help you today?</h3>
-      <p>Select your symptoms on the left, then click <strong>Analyze my symptoms</strong> or type a question below.</p>
-    </div>`;
-  document.getElementById('progress').style.width = '0%';
+// ── Clear ──
+function clearChat() {
+  fetch('/clear', { method: 'POST' }).catch(() => {});
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = `<div class="empty-state" id="empty-state">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><path d="M9 12h.01M12 12h.01M15 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <h3>How can I help you today?</h3>
+    <p>Describe your symptoms in any language — English, Hindi, or Hinglish.</p>
+    <div class="hint-chips">
+      <span class="hint-chip" onclick="useHint(this)">Mujhe bukhar hai</span>
+      <span class="hint-chip" onclick="useHint(this)">I have a headache</span>
+      <span class="hint-chip" onclick="useHint(this)">Pet mein dard ho raha hai</span>
+      <span class="hint-chip" onclick="useHint(this)">Severe stomach pain</span>
+    </div>
+  </div>`;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function autoGrow(el) {
+function autoResize(el) {
   el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
 }
-
-function shakeBtn() {
-  const b = document.getElementById('btn-analyze');
-  b.style.animation = 'none'; void b.offsetWidth;
-  b.style.animation = 'shake .4s ease';
-}
-
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }`;
-document.head.appendChild(shakeStyle);
 </script>
 </body>
 </html>

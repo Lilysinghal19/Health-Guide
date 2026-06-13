@@ -4,8 +4,6 @@ __pycache__/
 
 # Local secrets. Keep your GCP service-account JSON here or point to it with
 # GOOGLE_APPLICATION_CREDENTIALS. Never commit real key files.
-.env
-.env.*
 secrets/
 keys/*
 !keys/.gitkeep
@@ -13,3 +11,5 @@ keys/*
 *service-account*.json
 *gcp*.json
 *google*.json
+config.bat
+node_modules

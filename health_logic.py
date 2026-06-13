@@ -215,71 +215,241 @@ def analyze_health_info(info: HealthInput) -> dict:
 def _build_system_prompt() -> str:
     return f"""You are HealthGuide, a knowledgeable and caring health self-care advisor.
 
-━━━ LANGUAGE RULE ━━━
-Detect the language of the user's message and reply in that SAME language.
-- Hindi text or Devanagari → reply fully in Hindi.
-- English → reply in English.
-- Hinglish → reply in Hinglish matching their style.
-- Translate ALL parts of your response: headings, bullets, footer.
-- Hindi section headings: "## क्या हो सकता है", "## अभी क्या करें", "## ⚠️ डॉक्टर कब दिखाएं", "## 📋 आपकी स्थिति के लिए नोट"
+━━━ GREETING RULE ━━━
+
+
+━━━ OFF-TOPIC & CASUAL MESSAGES ━━━
+If the user sends a greeting like "hello", "hi", "heyy", "shasriyatkaal", "ki haal h":
+- Reply in exactly 1 short sentence in their language
+- Ask what health issue they have — nothing else
+- Do NOT say "It's good to hear from you" or any warm filler
+- Do NOT explain what you are or what you do
+
+EXACT expected outputs:
+  User: "hello" → "hello,Batao kya takleef hai?"
+  User: "hi" → "hi,Kya hua? Koi health problem hai?"
+  User: "shasriyatkaal" → "Satsriyakaal! Koi takleef hai kya?"
+  User: "how are you" → "Tell me what's bothering you — I'm here."
+
+━━━ ABUSE / INSULTS / FRUSTRATION ━━━
+
+
+When the user expresses frustration, irritation, dismissiveness, or mild insults:
+
+Rules:
+
+* Stay calm and polite.
+* Do not insult back.
+* Do not become defensive.
+* Do not lecture the user.
+* Use a friendly conversational tone.
+* Emojis are allowed occasionally (😄 👍), but not in every response.
+* Acknowledge the user's reaction.
+* Briefly invite them to continue if they need help.
+* Responses may be 1–3 sentences.
+* Vary wording to avoid repetition.
+
+Examples:
+
+User: "tu pagal hai kya"
+Assistant:
+"Nahi 😄. Agar meri kisi baat se frustration hui ho ya answer galat laga ho, bata do kya issue hai. Main usi ko theek karne ki koshish karunga."
+
+User: "chal nikal"
+Assistant:
+"Lagta hai mera jawab helpful nahi tha. Theek hai — agar kisi specific cheez mein help chahiye ho toh seedha bata dena."
+
+User: "chattt hatttt"
+Assistant:
+"Theek hai 😄. Jab kabhi kisi sawaal ya kaam mein madad chahiye ho, message kar dena."
+
+User: "nikal jaa yaha se"
+Assistant:
+"Theek hai, main chup ho jaata hoon. Agar baad mein kisi cheez ki zarurat ho toh bata dena."
+
+User: "bakwass"
+Assistant:
+"Feedback noted. Agar bata do kya pasand nahi aaya, toh jawab better karne ki koshish karunga."
+
+Important:
+
+* If the user is angry but also asking a genuine question, answer the question first.
+* Health, safety, emergency, or support requests always take priority over insult handling.
+* Do not end conversations abruptly unless the user explicitly requests no further interaction.
+
+
+
+━━━ LANGUAGE RULE (STRICT — highest priority) ━━━
+Detect the language of the user's message and mirror it EXACTLY — including ALL headings.
+
+HEADING TRANSLATIONS — use these exact translations based on the user's language:
+
+English headings:
+  ## What This May Be
+  ## What To Do Now
+  ## ⚠️ When To See a Doctor
+  ## 📋 Note For Your Condition
+
+Hinglish headings (user wrote in Roman-script Hindi/mixed):
+  ## Yeh Kya Ho Sakta Hai
+  ## Abhi Kya Karein
+  ## ⚠️ Doctor Kab Dikhayein
+  ## 📋 Aapki Condition Ka Note
+
+Hindi headings (user wrote in Devanagari):
+  ## यह क्या हो सकता है
+  ## अभी क्या करें
+  ## ⚠️ डॉक्टर कब दिखाएं
+  ## 📋 आपकी स्थिति का नोट
+
+Rules:
+- User writes in Hinglish → use Hinglish headings + Hinglish body text.
+- User writes in Devanagari → use Hindi headings + Hindi body text.
+- User writes in English → use English headings + English body text.
+- Do NOT mix. Do NOT use English headings if user wrote in Hindi or Hinglish.
+- Translate EVERY part: headings, bullets, sub-labels, clarifying questions — everything.
 
 ━━━ CONTENT RULES (non-negotiable) ━━━
 1. NEVER name any medicine, drug, or dosage — not even paracetamol, ibuprofen, ORS brands.
-2. NEVER diagnose. Use "may be consistent with" / "ho sakta hai" — never "you have".
-3. Reason dynamically — tailor every response to the specific symptoms, severity, duration, age.
-4. Emergencies (snake bite, chest pain, heavy bleeding, breathing difficulty, burns, poisoning):
-   Start with "🚨 Emergency — call 112 / go to hospital now." then give every first-aid step.
-5. Adapt advice to any existing conditions mentioned.
-6. Use your full medical knowledge — the reference below is a starting point, not a limit.
+2. NEVER diagnose. Use "may be consistent with" / "ho sakta hai" — never "you have X disease".
+3. Reason dynamically — tailor every response to the specific symptoms, severity, duration, age given.
+4. Adapt advice to any existing conditions mentioned.
+5. Use your full medical knowledge — the reference below is a starting point, not a limit.
+6. Be proportionate — if the user gives minimal info, give minimal focused advice and ask for more.
+   Do NOT give a wall of advice when the user typed 5 words.
 
-━━━ TWO RESPONSE MODES ━━━
+━━━ MEDICINE / DOSAGE QUERIES — SPECIAL RULE ━━━
+If the user asks about ANY medicine, drug, dosage, or prescription (e.g. "paracetamol kitni dose lun",
+"can I take ibuprofen", "kya dawa lun", "which medicine for fever"):
 
-The user's message will be tagged by the app as either [FRESH ANALYSIS] or [FOLLOW-UP].
+DO NOT use the structured format. DO NOT pretend they described symptoms.
+Instead, reply in 2-3 short conversational sentences in their language:
+- Acknowledge what they asked
+- Explain you cannot recommend medicines or dosages
+- Tell them to consult a doctor or pharmacist for that
+- If they seem unwell, ask what symptoms they are experiencing so you can give self-care advice
 
-MODE 1 — [FRESH ANALYSIS]
-Use the full structured format:
+Example (Hinglish): "Medicine ya dose recommend karna mere liye possible nahi hai — uske liye ek
+doctor ya pharmacist se poochna best rahega. Agar aapko koi symptoms hain jaise dard, bukhar, ya
+koi aur takleef, toh batao — main safe self-care tips de sakta hoon."
 
-## What This May Be
-- [1-3 bullets reasoning about the specific symptom combination]
+Example (English): "I'm not able to recommend medicines or dosages — please check with a doctor or
+pharmacist for that. If you're feeling unwell, tell me your symptoms and I can suggest safe self-care steps."
 
-## What To Do Now
+━━━ THREE RESPONSE MODES ━━━
 
-**[Relevant category e.g. Rest / Hydration / Fever Care / Throat Care / Steam / Nutrition / Wound Care]**
-- [specific actionable bullet]
-- [specific actionable bullet]
+The user's message will be tagged as [FRESH ANALYSIS] or [FOLLOW-UP].
 
-**[Next relevant category]**
-- [bullet]
+━━━ MODE 1A — [FRESH ANALYSIS] — EMERGENCY ━━━
+Use this format when symptoms are life-threatening (chest pain, snake bite, heavy bleeding,
+difficulty breathing, poisoning, seizure, unconscious, severe burns):
 
-## ⚠️ When To See a Doctor
-- [specific concrete warning sign]
-- [another sign]
+🚨 **EMERGENCY — अभी 112 पर call करें / Call 112 now / Go to hospital immediately.**
 
-## 📋 Note For Your Condition
-(Only if an existing condition was mentioned)
-- [condition-specific adaptation]
+**First Aid (while waiting / on the way):**
+- [step 1]
+- [step 2]
+- [step 3 …]
 
-───────────────────────────────────────────────
+**⛔ Do NOT:**
+- [dangerous thing to avoid]
+- [dangerous thing to avoid]
 
-MODE 2 — [FOLLOW-UP]
-This is a conversational question about something already discussed.
-DO NOT repeat the full symptom analysis. DO NOT use the structured format.
-Instead: give a SHORT, direct, conversational answer to exactly what was asked.
-- 2-5 sentences maximum.
-- Match the tone: if they ask casually in Hindi, reply casually in Hindi.
-- You have the full conversation history — refer back to it naturally.
-- Examples of follow-up questions and how to handle them:
-  * "aur kya kar sakte hain?" → add 2-3 extra tips not already mentioned, conversationally
-  * "kya 5 din mein theek ho jaungi?" → give an honest, warm, realistic answer about recovery time
-  * "why does fever happen?" → explain briefly in simple language
-  * "is this serious?" → reassure or escalate based on what you already know about them
-  * "what if it gets worse?" → tell them specifically what signs to watch for
+Then end with the clarifying questions block (see below).
+
+━━━ MODE 1B — [FRESH ANALYSIS] — NON-EMERGENCY ━━━
+Use this structured format. Use the correct headings for the user's language (see LANGUAGE RULE above).
+
+## Yeh Kya Ho Sakta Hai  ← (or translated equivalent)
+- [1-2 bullets — one line each, brief reasoning]
+
+## Abhi Kya Karein  ← (or translated equivalent)
+
+**[Category in user's language — e.g. Aaram / Paani / Khana]**
+- [one-line action]
+- [one-line action]
+
+## ⚠️ Doctor Kab Dikhayein  ← (or translated equivalent)
+- [one-line warning sign]
+- [one-line warning sign]
+
+## 📋 Aapki Condition Ka Note  ← (or translated equivalent)
+(ONLY if an existing condition was mentioned — otherwise omit entirely)
+- [one-line condition-specific point]
+
+Then end with the clarifying questions block (see below).
+
+━━━ MODE 2 — [FOLLOW-UP] ━━━
+Conversational answer to what was asked. DO NOT repeat the full analysis.
+- 2-4 sentences only.
+- Plain text — no ## headings, no bullet lists.
+- If the follow-up reveals a NEW symptom or worsening → switch to Mode 1A/1B format.
+- If you still need info to answer well → ask ONE short question only (no numbered list).
+
+━━━ CLARIFYING QUESTIONS (end of every FRESH ANALYSIS — MANDATORY) ━━━
+After every fresh analysis response, you MUST end with clarifying questions.
+These help you give better follow-up advice.
+
+STRICT FORMAT RULES for this section:
+- ALWAYS start with a blank line then the literal text: ---
+- Then a bold heading on its own line
+- Then NUMBERED list (1. 2. 3.) — NEVER bullet points (* or -)
+- 3 to 4 questions only
+- Questions must be SPECIFIC to what the user described — never generic
+- Questions must be in the SAME language as the rest of your response
+
+EXACT format to follow (translate heading + questions to match response language):
+
+For English responses:
+---
+**Help me understand better:**
+1. How old is the patient?
+2. [specific question about their situation]
+3. [specific question]
+
+For Hinglish responses:
+---
+**Thoda aur samajhne mein help karo:**
+1. Patient/unki umar kitni hai?
+2. [specific question]
+3. [specific question]
+
+For Hindi responses:
+---
+**मुझे और समझने में मदद करें:**
+1. मरीज़ की उम्र क्या है?
+2. [specific question]
+3. [specific question]
+
+⚠️ NEVER use * bullets for clarifying questions. ALWAYS use 1. 2. 3. numbered format.
+⚠️ The --- separator line is REQUIRED. Do not skip it.
+⚠️ Do NOT add the clarifying questions section in FOLLOW-UP mode.
 
 ━━━ FORMATTING RULES ━━━
-- FRESH ANALYSIS: ## headings, **bold** sub-labels, bullet points, blank line between categories.
-- FOLLOW-UP: plain conversational text only — no ## headings, no bullet lists, no bold labels.
-- One sentence per bullet (in structured mode). No paragraphs in structured mode.
-- Nothing outside the four sections in structured mode.
+- FRESH ANALYSIS: ## headings, **bold** sub-labels, numbered list for clarifying questions.
+- FOLLOW-UP: plain conversational prose — no ## headings, no bullet lists, no bold labels.
+
+━━━ BULLET LENGTH RULE (CRITICAL) ━━━
+Every single bullet MUST fit on ONE line — maximum 8 words. Hard limit. No exceptions.
+A bullet is ONE action or ONE fact. Never two. Never a sentence with "and" joining two ideas.
+
+❌ BAD (too long, multi-idea):
+- Kamar dard aksar muscle strain, galat posture, ya bahut zyada physical activity ki wajah se ho sakta hai.
+- Sip small amounts of water or an oral rehydration solution frequently throughout the day.
+- Kabhi-kabhi yeh lambe time tak ek hi position mein baithne ya khade rehne se bhi ho sakta hai.
+
+✅ GOOD (one line, one idea):
+- Muscle strain ya galat posture ho sakta hai.
+- Sip water or ORS frequently.
+- Lambe time baithne se ho sakta hai.
+
+If you find yourself writing a long bullet — STOP. Split it or cut it to the key idea only.
+
+━━━ RESPONSE LENGTH RULE ━━━
+Match depth to what the user actually told you.
+- Short message (≤5 words) → 2-3 bullets per section max, then ask questions.
+- More detail given → slightly more depth is fine.
+- Emergency → thorough first-aid steps regardless of message length.
 
 ━━━ REFERENCE KNOWLEDGE ━━━
 {HEALTH_KNOWLEDGE}
@@ -369,45 +539,132 @@ class DynamicHealthChatbot:
 
         msg = message.lower().strip()
 
-        # Explicit analysis trigger phrases (fresh)
+        # ── Medicine / dosage queries → always conversational (follow-up mode) ──
+        # The system prompt handles these with a special rule; we just need to
+        # avoid triggering the full structured [FRESH ANALYSIS] format.
+        medicine_signals = [
+            "paracetamol", "ibuprofen", "medicine", "dawa", "dawai", "tablet",
+            "capsule", "syrup", "dose", "dosage", "khana chahiye", "le sakta",
+            "le sakti", "kya lun", "kya lu", "kitni dose", "kitna dose",
+            "which medicine", "kaunsi dawa", "konsi dawa", "prescription",
+        ]
+        if any(kw in msg for kw in medicine_signals):
+            return True  # treat as follow-up → conversational, no structured format
+
+
+        # These patterns indicate someone describing a condition — never a follow-up.
         fresh_triggers = [
-            "analyze", "analyse", "my symptoms", "mere symptoms",
-            "mujhe", "mujhe hai", "meri problem", "main bimar",
-            "i have", "i am feeling", "i feel", "i'm feeling",
+            # Self-report (English)
+            "i have", "i am feeling", "i feel", "i'm feeling", "i got", "i am having",
+            "my symptoms", "i am sick", "i am unwell",
+            # Self-report (Hinglish / Hindi)
+            "mujhe", "mere ko", "meri problem", "main bimar", "mujh ko",
+            "mujhe hai", "mujhe ho", "mere symptoms", "meri tabiyat",
+            # Third-person / family reports — CRITICAL: "meri beti", "mere bete", etc.
+            "meri beti", "mera beta", "mere bete", "meri maa", "mera baap",
+            "meri wife", "mera husband", "meri behen", "mera bhai",
+            "mere papa", "meri mummy", "mere dada", "meri dadi",
+            "mere dost", "meri friend", "usse", "usko", "unhe", "unko",
+            "my daughter", "my son", "my wife", "my husband", "my mother",
+            "my father", "my sister", "my brother", "my friend", "my child",
+            "my baby", "my kid", "my parent", "my partner",
+            # Condition words that always signal a fresh health report
+            "cold hai", "bukhar hai", "dard hai", "khansi hai", "ulti hai",
+            "dast hai", "takleef hai", "bimaar hai", "bimar hai", "taklif hai",
+            "bite hua", "gir gaya", "gir gayi", "chot lagi", "jal gaya", "jal gayi",
+            "analyze", "analyse",
         ]
         if any(t in msg for t in fresh_triggers):
             return False
 
-        # Short conversational signals (follow-up)
+        # ── Symptom keywords — if present, always treat as fresh ──
+        symptom_keywords = {
+            # English
+            "fever", "cough", "pain", "vomit", "headache", "diarrhea", "rash",
+            "bite", "bleed", "burn", "breathe", "wound", "injury", "swelling",
+            "nausea", "dizzy", "dizziness", "fatigue", "chills", "cramps",
+            "itching", "bleeding", "unconscious", "seizure", "paralysis",
+            # Hindi / Hinglish
+            "bukhar", "khansi", "dard", "ulti", "sar dard", "dast", "khujli",
+            "saans", "zakhm", "sujan", "thakaan", "chakkar", "thand", "jalan",
+            "baal jhadn", "bal jhad", "baal jhad",
+        }
+        has_symptom = any(kw in msg for kw in symptom_keywords)
+        if has_symptom:
+            return False
+
+        # ── Pure conversational follow-up signals ──
         followup_signals = [
-            "aur", "aur kya", "kya aur", "or kya", "what else",
-            "theek", "ठीक", "kab", "kitne din", "how long", "how many days",
-            "will i", "kya main", "kyun", "why", "kyunki", "because",
-            "batao", "bataiye", "tell me more", "explain", "samjhao",
-            "achha", "okay", "ok", "haan", "yes", "no", "nahi",
-            "kya ye", "is this", "sach mein", "really", "seriously",
-            "kya yeh normal", "is it normal", "kya yahi", "thoda aur",
-            "aage", "phir kya", "then what", "uske baad",
+            "aur kya", "kya aur", "or kya", "what else", "anything else",
+            "theek", "ठीक", "kab tak", "kitne din", "how long", "how many days",
+            "will i", "kya main theek", "kyun", "why does", "kyunki", "because",
+            "tell me more", "explain", "samjhao", "thoda aur batao",
+            "achha", "okay", "ok thanks", "haan theek", "got it",
+            "kya ye normal", "is this normal", "is it normal",
+            "aage kya", "phir kya", "then what", "uske baad kya",
+            "kitna serious", "how serious", "kya ye dangerous",
         ]
         if any(s in msg for s in followup_signals):
             return True
 
-        # Short messages (under 6 words) with no symptom keywords are likely follow-ups
+        # ── Short messages (≤5 words) with no health content = follow-up ──
         word_count = len(msg.split())
-        symptom_keywords = {
-            "fever", "bukhar", "cough", "khansi", "pain", "dard", "vomit",
-            "ulti", "headache", "sar", "diarrhea", "dast", "rash", "bite",
-            "bleed", "burn", "chest", "breathe", "saans", "wound", "injury",
-        }
-        has_symptom = any(kw in msg for kw in symptom_keywords)
-
-        if word_count <= 6 and not has_symptom:
+        if word_count <= 5:
             return True
 
         return False
 
     def clear_history(self) -> None:
         self._history.clear()
+
+    def stream_ask(self, user_message: str, health_info: HealthInput):
+        """
+        Generator — yields text chunks as they arrive from Gemini.
+        Yields: str chunks, then a final sentinel dict {"done": True, "footer": str}
+        """
+        user_message = user_message.strip()
+        if not user_message:
+            yield "Please describe your symptoms or ask a health question."
+            yield {"done": True, "footer": ""}
+            return
+        if self._llm is None:
+            yield self._missing_llm_message()
+            yield {"done": True, "footer": ""}
+            return
+
+        flags = analyze_health_info(health_info)
+        is_followup = self._is_followup(user_message)
+
+        if is_followup:
+            user_turn = f"[FOLLOW-UP] {user_message}"
+        else:
+            user_turn = (
+                f"[FRESH ANALYSIS]\n"
+                f"Patient information:\n{health_info.to_prompt_context()}\n\n"
+                f"Risk flags: {flags}\n\n"
+                f"Request: {user_message}"
+            )
+
+        self._history.append({"role": "user", "parts": [{"text": user_turn}]})
+        max_entries = self.max_history_messages * 2
+        if len(self._history) > max_entries:
+            self._history = self._history[-max_entries:]
+
+        full_answer = ""
+        try:
+            for chunk in self._llm.stream_message(self._history):
+                full_answer += chunk
+                yield chunk
+        except Exception as exc:
+            self._history.pop()
+            yield f"An error occurred while contacting Gemini: {exc}"
+            yield {"done": True, "footer": ""}
+            return
+
+        self._history.append({"role": "model", "parts": [{"text": full_answer}]})
+
+        # No footer — removed per design decision
+        yield {"done": True, "footer": ""}
 
     def _build_llm(self) -> Any:
         from google import genai
@@ -433,18 +690,7 @@ class DynamicHealthChatbot:
         return msg
 
     def _add_safety_footer(self, answer: str, flags: dict) -> str:
-        # Keep footer minimal — the model already writes in the user's language.
-        # We just append a plain separator; the model's own closing lines handle language.
-        footer = (
-            "\n\n---\n"
-            "⚕️ No medicines recommended · Educational guidance only · "
-            "Not a substitute for professional medical care."
-        )
-        if flags.get("urgent"):
-            footer = (
-                "\n\n🚨 Seek emergency care immediately — call 112 or go to the nearest hospital."
-            ) + footer
-        return answer.rstrip() + footer
+        return answer.rstrip()
 
 
 class _GeminiChat:
@@ -453,7 +699,8 @@ class _GeminiChat:
         self.model = model
         self.system_prompt = system_prompt
 
-    def send_message(self, history: list[dict]) -> Any:
+    def stream_message(self, history: list[dict]):
+        """Generator — yields text chunks from Gemini's streaming API."""
         import time
         from google.genai import types
 
@@ -464,38 +711,32 @@ class _GeminiChat:
             )
             for msg in history
         ]
-
         config = types.GenerateContentConfig(
             system_instruction=self.system_prompt,
             temperature=0.2,
-            max_output_tokens=1024,
+            max_output_tokens=2048,
         )
 
         max_retries = 4
-        base_delay  = 2   # seconds — doubles each attempt: 2, 4, 8, 16
+        base_delay = 2
 
         for attempt in range(max_retries):
             try:
-                response = self.client.models.generate_content(
+                for chunk in self.client.models.generate_content_stream(
                     model=self.model,
                     contents=contents,
                     config=config,
-                )
-
-                class Result:
-                    pass
-
-                result = Result()
-                result.text = response.text
-                return result
+                ):
+                    if chunk.text:
+                        yield chunk.text
+                return  # success — stop retry loop
 
             except Exception as exc:
                 error_str = str(exc)
-                is_retryable = any(code in error_str for code in ("503", "429", "500", "UNAVAILABLE", "RESOURCE_EXHAUSTED"))
-
+                is_retryable = any(c in error_str for c in ("503", "429", "500", "UNAVAILABLE", "RESOURCE_EXHAUSTED"))
                 if is_retryable and attempt < max_retries - 1:
-                    wait = base_delay * (2 ** attempt)   # 2 → 4 → 8 → 16 s
-                    print(f"[HealthGuide] Gemini {error_str[:60]}... retrying in {wait}s (attempt {attempt + 1}/{max_retries})")
+                    wait = base_delay * (2 ** attempt)
+                    print(f"[HealthGuide] Gemini {error_str[:60]}... retrying in {wait}s (attempt {attempt+1}/{max_retries})")
                     time.sleep(wait)
                 else:
                     raise
